@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const parcelaController = require('../controllers/parcelaController');
-const auth = require('../middlewares/auth'); // el middleware de Persona 1
+const auth = require('../middlewares/auth');
 
 router.post('/', auth, parcelaController.crearParcela);
 router.get('/', auth, parcelaController.listarParcelas);
