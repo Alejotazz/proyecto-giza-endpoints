@@ -1,10 +1,8 @@
-
 const express = require('express');
 const app = express();
 
 app.use(express.json());
 
-// --- Rutas ---
 const usuariosRoutes = require('./usuarios.routes'); 
 app.use('/', usuariosRoutes);
 
