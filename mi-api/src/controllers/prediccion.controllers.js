@@ -1,4 +1,4 @@
-const parcelaDatos = require("../models/parcela-datos.models");
+const parcelaDatos = require("../models/prediccion.models");
 
 function subirImagen(req, res) {
   const { id } = req.params;

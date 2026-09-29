@@ -1,27 +1,26 @@
 const express = require('express');
 const app = express();
- 
+
 app.use(express.json());
- 
+
 
 const usuariosRoutes = require('./routes/usuarios.routes');
 app.use('/api/usuarios', usuariosRoutes);
- 
 
-const terrenoRoutes = require('./routes/terreno.routes');
-const imagenRoutes = require('./routes/imagen.routes');
-const muestraSueloRoutes = require('./routes/muestraSuelo.routes');
-const climaRoutes = require('./routes/clima.routes');
-const cosechaRoutes = require('./routes/cosecha.routes');
- 
-app.use('/api', terrenoRoutes);
-app.use('/api', imagenRoutes);
-app.use('/api', muestraSueloRoutes);
-app.use('/api', climaRoutes);
-app.use('/api', cosechaRoutes);
- 
 
-const prediccionroutes = require("./routes/prediccion.routes");
-app.use("/prediccion", prediccionroutes);
- 
+const parcelaRoutes = require('./routes/parcela.routes');
+app.use('/parcelas', parcelaRoutes);
+
+const prediccionRoutes = require('./routes/prediccion.routes');
+app.use('/prediccion', prediccionRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ mensaje: 'Ruta no encontrada' });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ mensaje: 'Error interno del servidor' });
+});
+
 module.exports = app;
