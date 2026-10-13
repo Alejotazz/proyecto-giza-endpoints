@@ -26,7 +26,7 @@ function verificarToken(req, res, next) {
 }
 
 // Permite el paso solo a los roles indicados. Se usa DESPUÉS de verificarToken.
-//   router.delete('/:id', verificarToken, verificarRol('admin'), controller.eliminar);
+//   router.delete('/:id', verificarToken, verificarRol('administrador'), controller.eliminar);
 function verificarRol(...rolesPermitidos) {
   return (req, res, next) => {
     if (!req.usuario || !rolesPermitidos.includes(req.usuario.rol)) {
@@ -37,7 +37,7 @@ function verificarRol(...rolesPermitidos) {
 }
 
 // Permite el paso si el usuario es dueño del recurso (:id de la URL) o tiene uno de los roles indicados.
-//   router.put('/usuarios/:id', verificarToken, verificarDuenoORol('admin'), controller.actualizar);
+//   router.put('/usuarios/:id', verificarToken, verificarDuenoORol('administrador'), controller.actualizar);
 function verificarDuenoORol(...rolesPermitidos) {
   return (req, res, next) => {
     const esDueno = req.usuario && String(req.usuario.id_usuario) === String(req.params.id);

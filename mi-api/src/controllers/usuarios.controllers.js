@@ -43,7 +43,7 @@ async function updateUsuario(req, res) {
     const datos = {
       nombre: nombre ?? usuarioExistente.nombre,
       correo: correo ?? usuarioExistente.correo,
-      rol: req.usuario.rol === 'admin' && rol ? rol : usuarioExistente.rol,
+      rol: req.usuario.rol === 'administrador' && rol ? rol : usuarioExistente.rol,
     };
     const usuarioActualizado = await usuariosModel.updateUsuario(req.params.id, datos);
     res.json(usuarioActualizado);

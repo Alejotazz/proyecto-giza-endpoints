@@ -10,6 +10,6 @@ router.post('/auth/login', ctrl.login);
 // ===== RUTAS PRIVADAS (exigen token válido) =====
 router.get('/auth/perfil', verificarToken, ctrl.perfil);
 // Expone correos de otros usuarios: solo admin
-router.get('/auth/conectados', verificarToken, verificarRol('admin'), ctrl.usuariosConectados);
+router.get('/auth/conectados', verificarToken, verificarRol('administrador'), ctrl.usuariosConectados);
 
 module.exports = router;
