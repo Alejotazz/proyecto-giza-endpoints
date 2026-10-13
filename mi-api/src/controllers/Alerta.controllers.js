@@ -1,4 +1,4 @@
-const AlertaModel = require('../models/alerta.model');
+const AlertaModel = require('../models/Alerta.models');
 
 const getAllAlertas = async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const pool = require('../../config/db');
 
 async function obtenerTerrenos() {
   const [rows] = await pool.query('SELECT * FROM terrenos');

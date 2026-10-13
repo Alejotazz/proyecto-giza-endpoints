@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/retroalimentacion.controller');
+const ctrl = require('../controllers/Retroalimentacion.controllers');
 
 router.get('/retroalimentacion', ctrl.getAllRetroalimentacion);
 router.get('/retroalimentacion/:id', ctrl.getRetroalimentacionById);

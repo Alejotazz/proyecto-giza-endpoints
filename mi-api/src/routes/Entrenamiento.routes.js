@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/entrenamiento.controller');
+const ctrl = require('../controllers/Entrenamiento.controllers');
 
 router.get('/entrenamientos', ctrl.getAllEntrenamientos);
 router.get('/entrenamientos/:id', ctrl.getEntrenamientoById);

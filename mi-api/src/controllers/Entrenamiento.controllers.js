@@ -1,4 +1,4 @@
-const EntrenamientoModel = require('../models/entrenamiento.model');
+const EntrenamientoModel = require('../models/Entrenamiento.models');
 
 const getAllEntrenamientos = async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-const EvaluacionModel = require('../models/evaluacion.model');
+const EvaluacionModel = require('../models/Evaluacion.models');
 
 const getAllEvaluaciones = async (req, res) => {
   try {

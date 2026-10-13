@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/modelo.controller');
+const ctrl = require('../controllers/Modelo.controllers');
 
 router.get('/modelos', ctrl.getAllModelos);
 router.get('/modelos/:id', ctrl.getModeloById);
