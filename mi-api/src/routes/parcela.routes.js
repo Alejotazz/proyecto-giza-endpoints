@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const parcelaController = require('../controllers/parcelaController');
+const parcelaController = require('../controllers/parcela.controllers');
 
-
-router.post('/', auth, parcelaController.crearParcela);
-router.get('/', auth, parcelaController.listarParcelas);
-router.get('/:id', auth, parcelaController.obtenerParcela);
-router.put('/:id', auth, parcelaController.editarParcela);
-router.delete('/:id', auth, parcelaController.eliminarParcela);
+// El token ya lo exige app.js para todo este router (ver rutasProtegidas)
+router.post('/', parcelaController.crearParcela);
+router.get('/', parcelaController.listarParcelas);
+router.get('/:id', parcelaController.obtenerParcela);
+router.put('/:id', parcelaController.editarParcela);
+router.delete('/:id', parcelaController.eliminarParcela);
 
 module.exports = router;

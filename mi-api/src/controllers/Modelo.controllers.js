@@ -1,4 +1,4 @@
-const ModeloIAModel = require('../models/modelo.model');
+const ModeloIAModel = require('../models/Modelo.models');
 
 const getAllModelos = async (req, res) => {
   try {

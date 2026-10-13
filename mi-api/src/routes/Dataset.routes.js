@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/dataset.controller');
+const ctrl = require('../controllers/Dataset.controllers');
 
 router.get('/dataset', ctrl.getAllDataset);
 router.get('/dataset/:id', ctrl.getDatasetById);

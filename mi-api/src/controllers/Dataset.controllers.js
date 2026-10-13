@@ -1,4 +1,4 @@
-const DatasetModel = require('../models/dataset.model');
+const DatasetModel = require('../models/Dataset.models');
 
 const getAllDataset = async (req, res) => {
   try {

@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const pool = require('../../config/db');
 
 async function obtenerClimaPorTerreno(idTerreno) {
   const [rows] = await pool.query('SELECT * FROM datos_meteorologicos WHERE id_terreno = ?', [idTerreno]);

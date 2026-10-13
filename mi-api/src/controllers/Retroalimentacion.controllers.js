@@ -1,4 +1,4 @@
-const RetroalimentacionModel = require('../models/retroalimentacion.model');
+const RetroalimentacionModel = require('../models/Retroalimentacion.models');
 
 const getAllRetroalimentacion = async (req, res) => {
   try {

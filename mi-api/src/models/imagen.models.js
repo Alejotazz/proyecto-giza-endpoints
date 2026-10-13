@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const pool = require('../../config/db');
 
 async function obtenerImagenesPorTerreno(idTerreno) {
   const [rows] = await pool.query('SELECT * FROM capturas_imagenes WHERE id_terreno = ?', [idTerreno]);

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const ctrl = require('../controllers/alerta.controller');
+const ctrl = require('../controllers/Alerta.controllers');
 
 router.get('/alertas', ctrl.getAllAlertas);
 router.get('/alertas/:id', ctrl.getAlertaById);

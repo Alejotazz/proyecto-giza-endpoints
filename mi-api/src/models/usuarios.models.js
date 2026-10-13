@@ -1,22 +1,26 @@
-const pool = require('../db');
+const pool = require('../../config/db');
+
+// Columnas públicas: nunca se devuelve el password
+const COLUMNAS = 'id_usuario, nombre, correo, telefono, rol, fecha_registro';
 
 async function getAllUsuarios() {
-    const [rows] = await pool.query('SELECT * FROM usuarios');
+    const [rows] = await pool.query(`SELECT ${COLUMNAS} FROM usuarios`);
     return rows;
 }
 
 async function getUsuarioById(id) {
-const [rows] = await pool.query('SELECT * FROM usuarios WHERE id_usuario = ?', [id]);
+const [rows] = await pool.query(`SELECT ${COLUMNAS} FROM usuarios WHERE id_usuario = ?`, [id]);
 return rows[0] || null;
 }
 
 async function createUsuario(data) {
-    const { nombre, correo, contrasena, rol } = data;
+    // data.password debe llegar YA hasheado desde el controller
+    const { nombre, correo, password, telefono, rol } = data;
     const [result] = await pool.query(
-    'INSERT INTO usuarios (nombre, correo, contrasena, rol) VALUES (?, ?, ?, ?)',
-    [nombre, correo, contrasena, rol]
+    'INSERT INTO usuarios (nombre, correo, password, telefono, rol) VALUES (?, ?, ?, ?, ?)',
+    [nombre, correo, password, telefono || null, rol || 'agricultor']
     );
-    return { id_usuario: result.insertId, ...data };
+    return getUsuarioById(result.insertId);
 }
 
 async function updateUsuario(id, data) {
@@ -71,7 +75,7 @@ async function deleteCultivo(id) {
 
 async function getUsuariosByTerreno(idTerreno) {
     const [rows] = await pool.query(
-    `SELECT u.*, tu.rol AS rol_en_terreno
+    `SELECT u.id_usuario, u.nombre, u.correo, u.rol, tu.rol AS rol_en_terreno
     FROM terrenos_usuarios tu
     JOIN usuarios u ON u.id_usuario = tu.id_usuario
     WHERE tu.id_terreno = ?`,

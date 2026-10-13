@@ -1,5 +1,5 @@
-
-const usuariosModel = require('./usuarios.models');
+const bcrypt = require('bcryptjs');
+const usuariosModel = require('../models/usuarios.models');
 
 async function listUsuarios(req, res) {
   try {
@@ -22,11 +22,12 @@ async function getUsuario(req, res) {
 
 async function createUsuario(req, res) {
   try {
-    const { nombre, correo, contrasena, rol } = req.body;
-    if (!nombre || !correo || !contrasena) {
-      return res.status(400).json({ mensaje: 'nombre, correo y contrasena son obligatorios' });
+    const { nombre, correo, password, telefono, rol } = req.body;
+    if (!nombre || !correo || !password) {
+      return res.status(400).json({ mensaje: 'nombre, correo y password son obligatorios' });
     }
-    const nuevoUsuario = await usuariosModel.createUsuario({ nombre, correo, contrasena, rol });
+    const hash = await bcrypt.hash(password, 10);
+    const nuevoUsuario = await usuariosModel.createUsuario({ nombre, correo, password: hash, telefono, rol });
     res.status(201).json(nuevoUsuario);
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al crear el usuario', error: error.message });
@@ -37,7 +38,14 @@ async function updateUsuario(req, res) {
   try {
     const usuarioExistente = await usuariosModel.getUsuarioById(req.params.id);
     if (!usuarioExistente) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    const usuarioActualizado = await usuariosModel.updateUsuario(req.params.id, req.body);
+    const { nombre, correo, rol } = req.body;
+    // Solo un admin puede cambiar roles; los campos no enviados conservan su valor
+    const datos = {
+      nombre: nombre ?? usuarioExistente.nombre,
+      correo: correo ?? usuarioExistente.correo,
+      rol: req.usuario.rol === 'admin' && rol ? rol : usuarioExistente.rol,
+    };
+    const usuarioActualizado = await usuariosModel.updateUsuario(req.params.id, datos);
     res.json(usuarioActualizado);
   } catch (error) {
     res.status(500).json({ mensaje: 'Error al actualizar el usuario', error: error.message });
