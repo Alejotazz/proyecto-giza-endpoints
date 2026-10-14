@@ -49,19 +49,19 @@ async function getCultivoById(id) {
 }
 
 async function createCultivo(data) {
-    const { nombre, descripcion } = data;
+    const { nombre_cultivo } = data;
     const [result] = await pool.query(
-    'INSERT INTO cultivos (nombre, descripcion) VALUES (?, ?)',
-    [nombre, descripcion]
+    'INSERT INTO cultivos (nombre_cultivo) VALUES (?)',
+    [nombre_cultivo]
 );
-    return { id_cultivo: result.insertId, ...data };
+    return { id_cultivo: result.insertId, nombre_cultivo };
 }
 
 async function updateCultivo(id, data) {
-    const { nombre, descripcion } = data;
+    const { nombre_cultivo } = data;
     await pool.query(
-    'UPDATE cultivos SET nombre = ?, descripcion = ? WHERE id_cultivo = ?',
-    [nombre, descripcion, id]
+    'UPDATE cultivos SET nombre_cultivo = ? WHERE id_cultivo = ?',
+    [nombre_cultivo, id]
 );
     return getCultivoById(id);
 }
