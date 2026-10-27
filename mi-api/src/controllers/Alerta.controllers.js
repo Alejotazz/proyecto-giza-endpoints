@@ -1,57 +1,57 @@
 const AlertaModel = require('../models/Alerta.models');
 
-const getAllAlertas = async (req, res) => {
+const getAllAlertas = async (req, res, next) => {
   try {
     const data = await AlertaModel.getAll();
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const getAlertaById = async (req, res) => {
+const getAlertaById = async (req, res, next) => {
   try {
     const alerta = await AlertaModel.getById(req.params.id);
-    if (!alerta) return res.status(404).json({ error: 'Alerta no encontrada' });
+    if (!alerta) return res.status(404).json({ mensaje: 'Alerta no encontrada' });
     res.json(alerta);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const getAlertasByPrediccion = async (req, res) => {
+const getAlertasByPrediccion = async (req, res, next) => {
   try {
     const data = await AlertaModel.getByPrediccion(req.params.id_prediccion);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const createAlerta = async (req, res) => {
+const createAlerta = async (req, res, next) => {
   try {
     const nueva = await AlertaModel.create(req.params.id_prediccion, req.body);
     res.status(201).json(nueva);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const marcarAlertaLeida = async (req, res) => {
+const marcarAlertaLeida = async (req, res, next) => {
   try {
     const actualizada = await AlertaModel.marcarLeida(req.params.id);
     res.json(actualizada);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const deleteAlerta = async (req, res) => {
+const deleteAlerta = async (req, res, next) => {
   try {
     await AlertaModel.remove(req.params.id);
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 

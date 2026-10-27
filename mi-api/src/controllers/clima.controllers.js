@@ -1,20 +1,20 @@
 const modelo = require('../models/clima.models');
 
-async function listarClima(req, res) {
+async function listarClima(req, res, next) {
   try {
     const clima = await modelo.obtenerClimaPorTerreno(req.params.id);
     res.json(clima);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 }
 
-async function crearDatoClima(req, res) {
+async function crearDatoClima(req, res, next) {
   try {
     const nuevoDato = await modelo.crearDatoClima(req.params.id, req.body);
     res.status(201).json(nuevoDato);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 }
 

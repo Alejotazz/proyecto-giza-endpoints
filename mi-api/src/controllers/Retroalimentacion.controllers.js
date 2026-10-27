@@ -1,48 +1,48 @@
 const RetroalimentacionModel = require('../models/Retroalimentacion.models');
 
-const getAllRetroalimentacion = async (req, res) => {
+const getAllRetroalimentacion = async (req, res, next) => {
   try {
     const data = await RetroalimentacionModel.getAll();
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const getRetroalimentacionById = async (req, res) => {
+const getRetroalimentacionById = async (req, res, next) => {
   try {
     const feedback = await RetroalimentacionModel.getById(req.params.id);
-    if (!feedback) return res.status(404).json({ error: 'Registro no encontrado' });
+    if (!feedback) return res.status(404).json({ mensaje: 'Registro no encontrado' });
     res.json(feedback);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const createRetroalimentacion = async (req, res) => {
+const createRetroalimentacion = async (req, res, next) => {
   try {
     const nueva = await RetroalimentacionModel.create(req.body);
     res.status(201).json(nueva);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const updateRetroalimentacion = async (req, res) => {
+const updateRetroalimentacion = async (req, res, next) => {
   try {
     const actualizada = await RetroalimentacionModel.update(req.params.id, req.body);
     res.json(actualizada);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const deleteRetroalimentacion = async (req, res) => {
+const deleteRetroalimentacion = async (req, res, next) => {
   try {
     await RetroalimentacionModel.remove(req.params.id);
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 

@@ -1,26 +1,26 @@
 const bcrypt = require('bcryptjs');
 const usuariosModel = require('../models/usuarios.models');
 
-async function listUsuarios(req, res) {
+async function listUsuarios(req, res, next) {
   try {
     const usuarios = await usuariosModel.getAllUsuarios();
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener usuarios', error: error.message });
+    next(error);
   }
 }
 
-async function getUsuario(req, res) {
+async function getUsuario(req, res, next) {
   try {
     const usuario = await usuariosModel.getUsuarioById(req.params.id);
     if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     res.json(usuario);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener el usuario', error: error.message });
+    next(error);
   }
 }
 
-async function createUsuario(req, res) {
+async function createUsuario(req, res, next) {
   try {
     const { nombre, correo, password, telefono, rol } = req.body;
     if (!nombre || !correo || !password) {
@@ -30,11 +30,11 @@ async function createUsuario(req, res) {
     const nuevoUsuario = await usuariosModel.createUsuario({ nombre, correo, password: hash, telefono, rol });
     res.status(201).json(nuevoUsuario);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al crear el usuario', error: error.message });
+    next(error);
   }
 }
 
-async function updateUsuario(req, res) {
+async function updateUsuario(req, res, next) {
   try {
     const usuarioExistente = await usuariosModel.getUsuarioById(req.params.id);
     if (!usuarioExistente) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
@@ -48,42 +48,42 @@ async function updateUsuario(req, res) {
     const usuarioActualizado = await usuariosModel.updateUsuario(req.params.id, datos);
     res.json(usuarioActualizado);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al actualizar el usuario', error: error.message });
+    next(error);
   }
 }
 
-async function deleteUsuario(req, res) {
+async function deleteUsuario(req, res, next) {
   try {
     const eliminado = await usuariosModel.deleteUsuario(req.params.id);
     if (!eliminado) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     res.json({ mensaje: 'Usuario eliminado correctamente' });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al eliminar el usuario', error: error.message });
+    next(error);
   }
 }
 
 // ---------- CULTIVOS ----------
 
-async function listCultivos(req, res) {
+async function listCultivos(req, res, next) {
   try {
     const cultivos = await usuariosModel.getAllCultivos();
     res.json(cultivos);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener cultivos', error: error.message });
+    next(error);
   }
 }
 
-async function getCultivo(req, res) {
+async function getCultivo(req, res, next) {
   try {
     const cultivo = await usuariosModel.getCultivoById(req.params.id);
     if (!cultivo) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
     res.json(cultivo);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener el cultivo', error: error.message });
+    next(error);
   }
 }
 
-async function createCultivo(req, res) {
+async function createCultivo(req, res, next) {
   try {
     const { nombre_cultivo } = req.body;
     if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
@@ -91,11 +91,11 @@ async function createCultivo(req, res) {
     res.status(201).json(nuevoCultivo);
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
-    res.status(500).json({ mensaje: 'Error al crear el cultivo', error: error.message });
+    next(error);
   }
 }
 
-async function updateCultivo(req, res) {
+async function updateCultivo(req, res, next) {
   try {
     const { nombre_cultivo } = req.body;
     if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
@@ -105,11 +105,11 @@ async function updateCultivo(req, res) {
     res.json(cultivoActualizado);
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
-    res.status(500).json({ mensaje: 'Error al actualizar el cultivo', error: error.message });
+    next(error);
   }
 }
 
-async function deleteCultivo(req, res) {
+async function deleteCultivo(req, res, next) {
   try {
     const eliminado = await usuariosModel.deleteCultivo(req.params.id);
     if (!eliminado) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
@@ -118,22 +118,22 @@ async function deleteCultivo(req, res) {
     if (error.code === 'ER_ROW_IS_REFERENCED_2') {
       return res.status(409).json({ mensaje: 'No se puede eliminar: hay terrenos que usan este cultivo' });
     }
-    res.status(500).json({ mensaje: 'Error al eliminar el cultivo', error: error.message });
+    next(error);
   }
 }
 
 // ---------- TERRENOS_USUARIOS ----------
 
-async function listUsuariosDeTerreno(req, res) {
+async function listUsuariosDeTerreno(req, res, next) {
   try {
     const usuarios = await usuariosModel.getUsuariosByTerreno(req.params.id);
     res.json(usuarios);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener usuarios del terreno', error: error.message });
+    next(error);
   }
 }
 
-async function asignarUsuarioATerreno(req, res) {
+async function asignarUsuarioATerreno(req, res, next) {
   try {
     const { id } = req.params; // id_terreno
     const { id_usuario, rol } = req.body;
@@ -141,18 +141,18 @@ async function asignarUsuarioATerreno(req, res) {
     const relacion = await usuariosModel.asignarUsuarioATerreno(id, id_usuario, rol);
     res.status(201).json(relacion);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al asignar usuario al terreno', error: error.message });
+    next(error);
   }
 }
 
-async function quitarUsuarioDeTerreno(req, res) {
+async function quitarUsuarioDeTerreno(req, res, next) {
   try {
     const { id, id_usuario } = req.params;
     const eliminado = await usuariosModel.quitarUsuarioDeTerreno(id, id_usuario);
     if (!eliminado) return res.status(404).json({ mensaje: 'Relación no encontrada' });
     res.json({ mensaje: 'Usuario removido del terreno correctamente' });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al quitar usuario del terreno', error: error.message });
+    next(error);
   }
 }
 

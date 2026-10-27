@@ -3,10 +3,10 @@ const modelo = require('../models/terreno.models');
 // Traduce los errores de MySQL a mensajes claros; lo demás pasa al manejador central (500)
 function responderErrorBD(error, res, next) {
   if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-    return res.status(400).json({ error: 'El cultivo indicado (id_cultivo) no existe' });
+    return res.status(400).json({ mensaje: 'El cultivo indicado (id_cultivo) no existe' });
   }
   if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-    return res.status(409).json({ error: 'No se puede eliminar: el terreno tiene datos asociados' });
+    return res.status(409).json({ mensaje: 'No se puede eliminar: el terreno tiene datos asociados' });
   }
   next(error);
 }
@@ -28,7 +28,7 @@ async function listarTerrenos(req, res, next) {
 async function obtenerTerreno(req, res, next) {
   try {
     const terreno = await modelo.obtenerTerrenoPorId(req.params.id);
-    if (!terreno) return res.status(404).json({ error: 'Terreno no encontrado' });
+    if (!terreno) return res.status(404).json({ mensaje: 'Terreno no encontrado' });
     res.json(terreno);
   } catch (error) {
     next(error);
@@ -38,7 +38,7 @@ async function obtenerTerreno(req, res, next) {
 async function crearTerreno(req, res, next) {
   try {
     const invalido = validarTerreno(req.body || {});
-    if (invalido) return res.status(400).json({ error: invalido });
+    if (invalido) return res.status(400).json({ mensaje: invalido });
     const nuevoTerreno = await modelo.crearTerreno(req.body);
     res.status(201).json(nuevoTerreno);
   } catch (error) {
@@ -49,9 +49,9 @@ async function crearTerreno(req, res, next) {
 async function actualizarTerreno(req, res, next) {
   try {
     const invalido = validarTerreno(req.body || {});
-    if (invalido) return res.status(400).json({ error: invalido });
+    if (invalido) return res.status(400).json({ mensaje: invalido });
     const existente = await modelo.obtenerTerrenoPorId(req.params.id);
-    if (!existente) return res.status(404).json({ error: 'Terreno no encontrado' });
+    if (!existente) return res.status(404).json({ mensaje: 'Terreno no encontrado' });
     const terrenoActualizado = await modelo.actualizarTerreno(req.params.id, req.body);
     res.json(terrenoActualizado);
   } catch (error) {
@@ -62,7 +62,7 @@ async function actualizarTerreno(req, res, next) {
 async function eliminarTerreno(req, res, next) {
   try {
     const eliminado = await modelo.eliminarTerreno(req.params.id);
-    if (!eliminado) return res.status(404).json({ error: 'Terreno no encontrado' });
+    if (!eliminado) return res.status(404).json({ mensaje: 'Terreno no encontrado' });
     res.json({ mensaje: 'Terreno eliminado correctamente' });
   } catch (error) {
     responderErrorBD(error, res, next);

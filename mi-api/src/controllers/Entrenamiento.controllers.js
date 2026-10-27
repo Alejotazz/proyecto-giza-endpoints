@@ -1,57 +1,57 @@
 const EntrenamientoModel = require('../models/Entrenamiento.models');
 
-const getAllEntrenamientos = async (req, res) => {
+const getAllEntrenamientos = async (req, res, next) => {
   try {
     const data = await EntrenamientoModel.getAll();
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const getEntrenamientoById = async (req, res) => {
+const getEntrenamientoById = async (req, res, next) => {
   try {
     const entrenamiento = await EntrenamientoModel.getById(req.params.id);
-    if (!entrenamiento) return res.status(404).json({ error: 'Entrenamiento no encontrado' });
+    if (!entrenamiento) return res.status(404).json({ mensaje: 'Entrenamiento no encontrado' });
     res.json(entrenamiento);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const getEntrenamientosByModelo = async (req, res) => {
+const getEntrenamientosByModelo = async (req, res, next) => {
   try {
     const data = await EntrenamientoModel.getByModelo(req.params.id_modelo);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const createEntrenamiento = async (req, res) => {
+const createEntrenamiento = async (req, res, next) => {
   try {
     const nuevo = await EntrenamientoModel.create(req.params.id_modelo, req.body);
     res.status(201).json(nuevo);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const updateEntrenamiento = async (req, res) => {
+const updateEntrenamiento = async (req, res, next) => {
   try {
     const actualizado = await EntrenamientoModel.update(req.params.id, req.body);
     res.json(actualizado);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
-const deleteEntrenamiento = async (req, res) => {
+const deleteEntrenamiento = async (req, res, next) => {
   try {
     await EntrenamientoModel.remove(req.params.id);
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    next(err);
   }
 };
 
