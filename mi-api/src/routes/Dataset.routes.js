@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { verificarRol } = require('../middleware/auht.middleware');
 const ctrl = require('../controllers/Dataset.controllers');
 
 router.get('/dataset', ctrl.getAllDataset);
@@ -8,6 +7,6 @@ router.get('/dataset/:id', ctrl.getDatasetById);
 router.get('/terrenos/:id_terreno/dataset', ctrl.getDatasetByTerreno);
 router.post('/dataset', ctrl.createDataset);
 router.put('/dataset/:id', ctrl.updateDataset);
-router.delete('/dataset/:id', verificarRol('administrador'), ctrl.deleteDataset);
+router.delete('/dataset/:id', ctrl.deleteDataset);
 
 module.exports = router;

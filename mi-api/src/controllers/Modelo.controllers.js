@@ -1,48 +1,48 @@
 const ModeloIAModel = require('../models/Modelo.models');
 
-const getAllModelos = async (req, res, next) => {
+const getAllModelos = async (req, res) => {
   try {
     const data = await ModeloIAModel.getAll();
     res.json(data);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-const getModeloById = async (req, res, next) => {
+const getModeloById = async (req, res) => {
   try {
     const modelo = await ModeloIAModel.getById(req.params.id);
-    if (!modelo) return res.status(404).json({ mensaje: 'Modelo no encontrado' });
+    if (!modelo) return res.status(404).json({ error: 'Modelo no encontrado' });
     res.json(modelo);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-const createModelo = async (req, res, next) => {
+const createModelo = async (req, res) => {
   try {
     const nuevo = await ModeloIAModel.create(req.body);
     res.status(201).json(nuevo);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-const updateModelo = async (req, res, next) => {
+const updateModelo = async (req, res) => {
   try {
     const actualizado = await ModeloIAModel.update(req.params.id, req.body);
     res.json(actualizado);
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
-const deleteModelo = async (req, res, next) => {
+const deleteModelo = async (req, res) => {
   try {
     await ModeloIAModel.remove(req.params.id);
     res.status(204).send();
   } catch (err) {
-    next(err);
+    res.status(500).json({ error: err.message });
   }
 };
 
