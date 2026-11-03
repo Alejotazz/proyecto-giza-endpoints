@@ -1,159 +1,150 @@
 const bcrypt = require('bcryptjs');
 const usuariosModel = require('../models/usuarios.models');
+const { validarId } = require('../utils/validar');
+const { HttpError, noEncontrado, peticionInvalida } = require('../utils/errores');
+const { validarCorreo, validarPassword, validarTexto, validarRol } = require('../utils/usuarios.validacion');
+const { esAdmin } = require('../middleware/acceso.middleware');
+
+// Los errores de estas funciones async los responde error.middleware.js (Express 5)
+
+async function asegurarCorreoLibre(correo, idUsuarioActual) {
+  const otro = await usuariosModel.getUsuarioByCorreo(correo);
+  if (otro && String(otro.id_usuario) !== String(idUsuarioActual)) {
+    throw new HttpError(409, 'El correo ya está registrado');
+  }
+}
 
 async function listUsuarios(req, res) {
-  try {
-    const usuarios = await usuariosModel.getAllUsuarios();
-    res.json(usuarios);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener usuarios', error: error.message });
-  }
+  res.json(await usuariosModel.getAllUsuarios(req.query));
 }
 
 async function getUsuario(req, res) {
-  try {
-    const usuario = await usuariosModel.getUsuarioById(req.params.id);
-    if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    res.json(usuario);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener el usuario', error: error.message });
-  }
+  const usuario = await usuariosModel.getUsuarioById(validarId(req.params.id));
+  if (!usuario) throw noEncontrado('Usuario');
+  res.json(usuario);
 }
 
 async function createUsuario(req, res) {
-  try {
-    const { nombre, correo, password, telefono, rol } = req.body;
-    if (!nombre || !correo || !password) {
-      return res.status(400).json({ mensaje: 'nombre, correo y password son obligatorios' });
-    }
-    const hash = await bcrypt.hash(password, 10);
-    const nuevoUsuario = await usuariosModel.createUsuario({ nombre, correo, password: hash, telefono, rol });
-    res.status(201).json(nuevoUsuario);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al crear el usuario', error: error.message });
-  }
+  const body = req.body || {};
+  const nombre = validarTexto(body.nombre, 'nombre', { requerido: true });
+  const correo = validarCorreo(body.correo);
+  const password = validarPassword(body.password);
+  const telefono = validarTexto(body.telefono, 'telefono', { maxLargo: 30 });
+  const rol = body.rol === undefined ? undefined : validarRol(body.rol);
+
+  await asegurarCorreoLibre(correo);
+  const hash = await bcrypt.hash(password, 10);
+  const nuevoUsuario = await usuariosModel.createUsuario({ nombre, correo, password: hash, telefono, rol });
+  res.status(201).json(nuevoUsuario);
 }
 
 async function updateUsuario(req, res) {
-  try {
-    const usuarioExistente = await usuariosModel.getUsuarioById(req.params.id);
-    if (!usuarioExistente) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    const { nombre, correo, rol } = req.body;
-    // Solo un admin puede cambiar roles; los campos no enviados conservan su valor
-    const datos = {
-      nombre: nombre ?? usuarioExistente.nombre,
-      correo: correo ?? usuarioExistente.correo,
-      rol: req.usuario.rol === 'administrador' && rol ? rol : usuarioExistente.rol,
-    };
-    const usuarioActualizado = await usuariosModel.updateUsuario(req.params.id, datos);
-    res.json(usuarioActualizado);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al actualizar el usuario', error: error.message });
+  const id = validarId(req.params.id);
+  const usuarioExistente = await usuariosModel.getUsuarioById(id);
+  if (!usuarioExistente) throw noEncontrado('Usuario');
+
+  const body = req.body || {};
+  if (body.rol !== undefined && !esAdmin(req)) {
+    throw new HttpError(403, 'Solo un administrador puede cambiar roles');
   }
+
+  // Los campos no enviados conservan su valor
+  const datos = {
+    nombre: body.nombre !== undefined ? validarTexto(body.nombre, 'nombre', { requerido: true }) : usuarioExistente.nombre,
+    correo: body.correo !== undefined ? validarCorreo(body.correo) : usuarioExistente.correo,
+    telefono: body.telefono !== undefined ? validarTexto(body.telefono, 'telefono', { maxLargo: 30 }) : usuarioExistente.telefono,
+    rol: body.rol !== undefined ? validarRol(body.rol) : usuarioExistente.rol,
+  };
+
+  // Un admin no puede quitarse a sí mismo el rol de admin (evita quedarse sin administradores)
+  if (String(id) === String(req.usuario.id_usuario) && datos.rol !== usuarioExistente.rol) {
+    throw peticionInvalida('No puedes cambiar tu propio rol');
+  }
+
+  if (datos.correo !== usuarioExistente.correo) await asegurarCorreoLibre(datos.correo, id);
+
+  res.json(await usuariosModel.updateUsuario(id, datos));
 }
 
 async function deleteUsuario(req, res) {
-  try {
-    const eliminado = await usuariosModel.deleteUsuario(req.params.id);
-    if (!eliminado) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
-    res.json({ mensaje: 'Usuario eliminado correctamente' });
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al eliminar el usuario', error: error.message });
+  const id = validarId(req.params.id);
+  if (String(id) === String(req.usuario.id_usuario)) {
+    throw peticionInvalida('No puedes eliminar tu propia cuenta');
   }
+  const eliminado = await usuariosModel.deleteUsuario(id);
+  if (!eliminado) throw noEncontrado('Usuario');
+  res.json({ mensaje: 'Usuario eliminado correctamente' });
 }
 
 // ---------- CULTIVOS ----------
 
 async function listCultivos(req, res) {
-  try {
-    const cultivos = await usuariosModel.getAllCultivos();
-    res.json(cultivos);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener cultivos', error: error.message });
-  }
+  res.json(await usuariosModel.getAllCultivos(req.query));
 }
 
 async function getCultivo(req, res) {
-  try {
-    const cultivo = await usuariosModel.getCultivoById(req.params.id);
-    if (!cultivo) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
-    res.json(cultivo);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener el cultivo', error: error.message });
-  }
+  const cultivo = await usuariosModel.getCultivoById(validarId(req.params.id));
+  if (!cultivo) throw noEncontrado('Cultivo');
+  res.json(cultivo);
 }
 
 async function createCultivo(req, res) {
+  const nombre_cultivo = validarTexto((req.body || {}).nombre_cultivo, 'nombre_cultivo', { requerido: true, maxLargo: 100 });
   try {
-    const { nombre_cultivo } = req.body;
-    if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
-    const nuevoCultivo = await usuariosModel.createCultivo({ nombre_cultivo });
-    res.status(201).json(nuevoCultivo);
+    res.status(201).json(await usuariosModel.createCultivo({ nombre_cultivo }));
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
-    res.status(500).json({ mensaje: 'Error al crear el cultivo', error: error.message });
+    if (error.code === 'ER_DUP_ENTRY') throw new HttpError(409, 'Ese cultivo ya existe');
+    throw error;
   }
 }
 
 async function updateCultivo(req, res) {
+  const id = validarId(req.params.id);
+  if (!(await usuariosModel.getCultivoById(id))) throw noEncontrado('Cultivo');
+  const nombre_cultivo = validarTexto((req.body || {}).nombre_cultivo, 'nombre_cultivo', { requerido: true, maxLargo: 100 });
   try {
-    const { nombre_cultivo } = req.body;
-    if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
-    const cultivoExistente = await usuariosModel.getCultivoById(req.params.id);
-    if (!cultivoExistente) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
-    const cultivoActualizado = await usuariosModel.updateCultivo(req.params.id, { nombre_cultivo });
-    res.json(cultivoActualizado);
+    res.json(await usuariosModel.updateCultivo(id, { nombre_cultivo }));
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
-    res.status(500).json({ mensaje: 'Error al actualizar el cultivo', error: error.message });
+    if (error.code === 'ER_DUP_ENTRY') throw new HttpError(409, 'Ese cultivo ya existe');
+    throw error;
   }
 }
 
 async function deleteCultivo(req, res) {
+  let eliminado;
   try {
-    const eliminado = await usuariosModel.deleteCultivo(req.params.id);
-    if (!eliminado) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
-    res.json({ mensaje: 'Cultivo eliminado correctamente' });
+    eliminado = await usuariosModel.deleteCultivo(validarId(req.params.id));
   } catch (error) {
     if (error.code === 'ER_ROW_IS_REFERENCED_2') {
-      return res.status(409).json({ mensaje: 'No se puede eliminar: hay terrenos que usan este cultivo' });
+      throw new HttpError(409, 'No se puede eliminar: hay terrenos que usan este cultivo');
     }
-    res.status(500).json({ mensaje: 'Error al eliminar el cultivo', error: error.message });
+    throw error;
   }
+  if (!eliminado) throw noEncontrado('Cultivo');
+  res.json({ mensaje: 'Cultivo eliminado correctamente' });
 }
 
 // ---------- TERRENOS_USUARIOS ----------
 
 async function listUsuariosDeTerreno(req, res) {
-  try {
-    const usuarios = await usuariosModel.getUsuariosByTerreno(req.params.id);
-    res.json(usuarios);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al obtener usuarios del terreno', error: error.message });
-  }
+  // req.idTerreno lo pone verificarAccesoTerreno (ver usuarios.routes.js)
+  res.json(await usuariosModel.getUsuariosByTerreno(req.idTerreno));
 }
 
 async function asignarUsuarioATerreno(req, res) {
-  try {
-    const { id } = req.params; // id_terreno
-    const { id_usuario, rol } = req.body;
-    if (!id_usuario) return res.status(400).json({ mensaje: 'id_usuario es obligatorio' });
-    const relacion = await usuariosModel.asignarUsuarioATerreno(id, id_usuario, rol);
-    res.status(201).json(relacion);
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al asignar usuario al terreno', error: error.message });
-  }
+  const body = req.body || {};
+  const idUsuario = validarId(body.id_usuario, 'id_usuario');
+  const rol = validarTexto(body.rol, 'rol', { maxLargo: 50 });
+  if (!(await usuariosModel.getUsuarioById(idUsuario))) throw noEncontrado('Usuario');
+  const relacion = await usuariosModel.asignarUsuarioATerreno(req.idTerreno, idUsuario, rol);
+  res.status(201).json(relacion);
 }
 
 async function quitarUsuarioDeTerreno(req, res) {
-  try {
-    const { id, id_usuario } = req.params;
-    const eliminado = await usuariosModel.quitarUsuarioDeTerreno(id, id_usuario);
-    if (!eliminado) return res.status(404).json({ mensaje: 'Relación no encontrada' });
-    res.json({ mensaje: 'Usuario removido del terreno correctamente' });
-  } catch (error) {
-    res.status(500).json({ mensaje: 'Error al quitar usuario del terreno', error: error.message });
-  }
+  const idUsuario = validarId(req.params.id_usuario, 'id_usuario');
+  const eliminado = await usuariosModel.quitarUsuarioDeTerreno(req.idTerreno, idUsuario);
+  if (!eliminado) throw noEncontrado('Relación');
+  res.json({ mensaje: 'Usuario removido del terreno correctamente' });
 }
 
 module.exports = {

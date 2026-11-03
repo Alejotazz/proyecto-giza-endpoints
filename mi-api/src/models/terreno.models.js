@@ -1,51 +1,45 @@
 const pool = require('../../config/db');
+const crud = require('../utils/crud');
+const { paginacion } = require('../utils/crud');
 
-async function obtenerTerrenos() {
-  const [rows] = await pool.query('SELECT * FROM terrenos');
+const TABLA = 'terrenos';
+const ID = 'id_terreno';
+
+const esquema = {
+  nombre: { tipo: 'texto', requerido: true, maxLargo: 150 },
+  id_cultivo: { tipo: 'entero', min: 1, requerido: true },
+  area_hectareas: { tipo: 'numero', min: 0 },
+  altitud_msnm: { tipo: 'numero', min: -500, max: 9000 },
+  topografia: { tipo: 'cualquiera' },
+  pendiente: { tipo: 'cualquiera' },
+  sistema_riego: { tipo: 'cualquiera' },
+  historial_uso_terreno: { tipo: 'texto', maxLargo: 5000 },
+  coordenadas_lat: { tipo: 'numero', min: -90, max: 90 },
+  coordenadas_lon: { tipo: 'numero', min: -180, max: 180 },
+};
+
+// Admin: todos los terrenos
+const obtenerTerrenos = (query) => crud.listar(TABLA, { query, orden: ID });
+
+// Usuario normal: solo los terrenos a los que está asignado
+async function obtenerTerrenosDeUsuario(idUsuario, query) {
+  const pag = paginacion(query);
+  const [rows] = await pool.query(
+    `SELECT t.* FROM terrenos t
+     JOIN terrenos_usuarios tu ON tu.id_terreno = t.id_terreno
+     WHERE tu.id_usuario = ?
+     ORDER BY t.id_terreno${pag.sql}`,
+    [idUsuario, ...pag.params]
+  );
   return rows;
 }
 
-async function obtenerTerrenoPorId(id) {
-  const [rows] = await pool.query('SELECT * FROM terrenos WHERE id_terreno = ?', [id]);
-  return rows[0];
-}
+const obtenerTerrenoPorId = (id) => crud.obtener(TABLA, ID, id);
+const crearTerreno = (datos) => crud.crear(TABLA, ID, datos);
+const actualizarTerreno = (id, datos) => crud.actualizar(TABLA, ID, id, datos);
+const eliminarTerreno = (id) => crud.eliminar(TABLA, ID, id);
 
-async function crearTerreno(datos) {
-  const {
-    nombre, id_cultivo, area_hectareas, altitud_msnm, topografia,
-    pendiente, sistema_riego, historial_uso_terreno, coordenadas_lat, coordenadas_lon,
-  } = datos;
-
-  const [resultado] = await pool.query(
-    `INSERT INTO terrenos
-      (nombre, id_cultivo, area_hectareas, altitud_msnm, topografia, pendiente, sistema_riego, historial_uso_terreno, coordenadas_lat, coordenadas_lon)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [nombre, id_cultivo, area_hectareas, altitud_msnm, topografia, pendiente, sistema_riego, historial_uso_terreno, coordenadas_lat, coordenadas_lon]
-  );
-
-  return { id_terreno: resultado.insertId, ...datos };
-}
-
-async function actualizarTerreno(id, datos) {
-  const {
-    nombre, id_cultivo, area_hectareas, altitud_msnm, topografia,
-    pendiente, sistema_riego, historial_uso_terreno, coordenadas_lat, coordenadas_lon,
-  } = datos;
-
-  await pool.query(
-    `UPDATE terrenos SET
-      nombre = ?, id_cultivo = ?, area_hectareas = ?, altitud_msnm = ?, topografia = ?,
-      pendiente = ?, sistema_riego = ?, historial_uso_terreno = ?, coordenadas_lat = ?, coordenadas_lon = ?
-     WHERE id_terreno = ?`,
-    [nombre, id_cultivo, area_hectareas, altitud_msnm, topografia, pendiente, sistema_riego, historial_uso_terreno, coordenadas_lat, coordenadas_lon, id]
-  );
-
-  return obtenerTerrenoPorId(id);
-}
-
-async function eliminarTerreno(id) {
-  const [resultado] = await pool.query('DELETE FROM terrenos WHERE id_terreno = ?', [id]);
-  return resultado.affectedRows > 0;
-}
-
-module.exports = { obtenerTerrenos, obtenerTerrenoPorId, crearTerreno, actualizarTerreno, eliminarTerreno };
+module.exports = {
+  esquema, obtenerTerrenos, obtenerTerrenosDeUsuario, obtenerTerrenoPorId,
+  crearTerreno, actualizarTerreno, eliminarTerreno,
+};

@@ -1,30 +1,21 @@
 const modelo = require('../models/imagen.models');
+const { validar, validarId } = require('../utils/validar');
+const { noEncontrado } = require('../utils/errores');
 
 async function listarImagenes(req, res) {
-  try {
-    const imagenes = await modelo.obtenerImagenesPorTerreno(req.params.id);
-    res.json(imagenes);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  res.json(await modelo.obtenerImagenesPorTerreno(req.idTerreno, req.query));
 }
 
 async function crearImagen(req, res) {
-  try {
-    const nuevaImagen = await modelo.crearImagen(req.params.id, req.body);
-    res.status(201).json(nuevaImagen);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+  const datos = validar(modelo.esquema, req.body);
+  res.status(201).json(await modelo.crearImagen(req.idTerreno, datos));
 }
 
 async function etiquetarImagen(req, res) {
-  try {
-    const imagenActualizada = await modelo.actualizarImagen(req.params.id, req.body);
-    res.json(imagenActualizada);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+  const datos = validar(modelo.esquemaEtiqueta, req.body, { parcial: true });
+  const imagen = await modelo.actualizarImagen(validarId(req.params.id), datos);
+  if (!imagen) throw noEncontrado('Imagen');
+  res.json(imagen);
 }
 
 module.exports = { listarImagenes, crearImagen, etiquetarImagen };

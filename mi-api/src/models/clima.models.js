@@ -1,24 +1,35 @@
 const pool = require('../../config/db');
+const crud = require('../utils/crud');
 
-async function obtenerClimaPorTerreno(idTerreno) {
-  const [rows] = await pool.query('SELECT * FROM datos_meteorologicos WHERE id_terreno = ?', [idTerreno]);
-  return rows;
-}
+const TABLA = 'datos_meteorologicos';
+const ID = 'id_clima';
 
+const esquema = {
+  fecha: { tipo: 'fecha', requerido: true },
+  temp_max: { tipo: 'numero', min: -90, max: 70 },
+  temp_min: { tipo: 'numero', min: -90, max: 70 },
+  temp_promedio: { tipo: 'numero', min: -90, max: 70 },
+  precipitacion_mm: { tipo: 'numero', min: 0 },
+  humedad_relativa: { tipo: 'numero', min: 0, max: 100 },
+  radiacion_solar: { tipo: 'numero', min: 0 },
+  velocidad_viento: { tipo: 'numero', min: 0 },
+  indice_uv: { tipo: 'numero', min: 0, max: 20 },
+  gdd: { tipo: 'numero' },
+};
+
+const obtenerClimaPorTerreno = (idTerreno, query) =>
+  crud.listar(TABLA, { where: 'id_terreno = ?', params: [idTerreno], query, orden: 'fecha' });
+
+// Devuelve lo enviado + ids (no se relee la fila porque no conocemos con certeza
+// el nombre de la clave primaria de datos_meteorologicos)
 async function crearDatoClima(idTerreno, datos) {
-  const {
-    fecha, temp_max, temp_min, temp_promedio, precipitacion_mm,
-    humedad_relativa, radiacion_solar, velocidad_viento, indice_uv, gdd,
-  } = datos;
-
+  const columnas = ['id_terreno', ...Object.keys(datos)];
+  const valores = [idTerreno, ...Object.values(datos)];
   const [resultado] = await pool.query(
-    `INSERT INTO datos_meteorologicos
-      (id_terreno, fecha, temp_max, temp_min, temp_promedio, precipitacion_mm, humedad_relativa, radiacion_solar, velocidad_viento, indice_uv, gdd)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [idTerreno, fecha, temp_max, temp_min, temp_promedio, precipitacion_mm, humedad_relativa, radiacion_solar, velocidad_viento, indice_uv, gdd]
+    `INSERT INTO ${TABLA} (${columnas.join(', ')}) VALUES (${columnas.map(() => '?').join(', ')})`,
+    valores
   );
-
-  return { id_clima: resultado.insertId, id_terreno: idTerreno, ...datos };
+  return { [ID]: resultado.insertId, id_terreno: idTerreno, ...datos };
 }
 
-module.exports = { obtenerClimaPorTerreno, crearDatoClima };
+module.exports = { esquema, obtenerClimaPorTerreno, crearDatoClima };

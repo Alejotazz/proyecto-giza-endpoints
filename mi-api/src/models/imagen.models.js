@@ -1,39 +1,27 @@
-const pool = require('../../config/db');
+const crud = require('../utils/crud');
 
-async function obtenerImagenesPorTerreno(idTerreno) {
-  const [rows] = await pool.query('SELECT * FROM capturas_imagenes WHERE id_terreno = ?', [idTerreno]);
-  return rows;
-}
+const TABLA = 'capturas_imagenes';
+const ID = 'id_imagen';
 
-async function crearImagen(idTerreno, datos) {
-  const {
-    tipo_imagen, url_archivo, fecha_captura, hora_captura,
-    coordenadas_gps, zona_interes, nivel_rendimiento_esperado,
-  } = datos;
+const esquema = {
+  tipo_imagen: { tipo: 'cualquiera', maxLargo: 50 },
+  url_archivo: { tipo: 'url', requerido: true, maxLargo: 2048 },
+  fecha_captura: { tipo: 'fecha' },
+  hora_captura: { tipo: 'hora' },
+  coordenadas_gps: { tipo: 'cualquiera' },
+  zona_interes: { tipo: 'cualquiera' },
+  nivel_rendimiento_esperado: { tipo: 'cualquiera' },
+};
 
-  const [resultado] = await pool.query(
-    `INSERT INTO capturas_imagenes
-      (id_terreno, tipo_imagen, url_archivo, fecha_captura, hora_captura, coordenadas_gps, zona_interes, nivel_rendimiento_esperado)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [idTerreno, tipo_imagen, url_archivo, fecha_captura, hora_captura, coordenadas_gps, zona_interes, nivel_rendimiento_esperado]
-  );
+// Etiquetado manual
+const esquemaEtiqueta = {
+  etiqueta_estado: { tipo: 'texto', valores: ['saludable', 'estresado', 'enfermo'] },
+  validado_doble_panel: { tipo: 'booleano' },
+};
 
-  return { id_imagen: resultado.insertId, id_terreno: idTerreno, ...datos };
-}
+const obtenerImagenesPorTerreno = (idTerreno, query) =>
+  crud.listar(TABLA, { where: 'id_terreno = ?', params: [idTerreno], query, orden: ID });
+const crearImagen = (idTerreno, datos) => crud.crear(TABLA, ID, { ...datos, id_terreno: idTerreno });
+const actualizarImagen = (id, datos) => crud.actualizar(TABLA, ID, id, datos, 'fecha_etiquetado = NOW()');
 
-// Etiquetado manual (saludable / estresado / enfermo)
-async function actualizarImagen(id, datos) {
-  const { etiqueta_estado, validado_doble_panel } = datos;
-
-  await pool.query(
-    `UPDATE capturas_imagenes SET
-      etiqueta_estado = ?, validado_doble_panel = ?, fecha_etiquetado = NOW()
-     WHERE id_imagen = ?`,
-    [etiqueta_estado, validado_doble_panel, id]
-  );
-
-  const [rows] = await pool.query('SELECT * FROM capturas_imagenes WHERE id_imagen = ?', [id]);
-  return rows[0];
-}
-
-module.exports = { obtenerImagenesPorTerreno, crearImagen, actualizarImagen };
+module.exports = { TABLA, ID, esquema, esquemaEtiqueta, obtenerImagenesPorTerreno, crearImagen, actualizarImagen };

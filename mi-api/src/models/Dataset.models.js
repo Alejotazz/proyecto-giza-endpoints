@@ -1,62 +1,18 @@
-const pool = require('../../config/db');
-
-const getAll = async () => {
-  const [rows] = await pool.query('SELECT * FROM dataset_procesado');
-  return rows;
+// Tabla dataset_procesado. Las consultas genéricas están en utils/crud.js
+module.exports = {
+  tabla: 'dataset_procesado',
+  id: 'id_registro',
+  que: 'Registro',
+  esquema: {
+    id_terreno: { tipo: 'entero', min: 1, requerido: true },
+    id_cultivo: { tipo: 'entero', min: 1 },
+    temporada: { tipo: 'cualquiera', maxLargo: 50 },
+    ndvi: { tipo: 'numero', min: -1, max: 1 },
+    evi: { tipo: 'numero', min: -1, max: 1 },
+    indice_fertilidad: { tipo: 'numero' },
+    lluvia_acumulada: { tipo: 'numero', min: 0 },
+    gdd_acumulado: { tipo: 'numero' },
+    tendencia_rendimiento_5temp: { tipo: 'numero' },
+    particion: { tipo: 'cualquiera', maxLargo: 20 },
+  },
 };
-
-const getById = async (id_registro) => {
-  const [rows] = await pool.query(
-    'SELECT * FROM dataset_procesado WHERE id_registro = ?',
-    [id_registro]
-  );
-  return rows[0];
-};
-
-const getByTerreno = async (id_terreno) => {
-  const [rows] = await pool.query(
-    'SELECT * FROM dataset_procesado WHERE id_terreno = ?',
-    [id_terreno]
-  );
-  return rows;
-};
-
-const create = async (data) => {
-  const {
-    id_terreno, id_cultivo, temporada, ndvi, evi, indice_fertilidad,
-    lluvia_acumulada, gdd_acumulado, tendencia_rendimiento_5temp, particion
-  } = data;
-  const [result] = await pool.query(
-    `INSERT INTO dataset_procesado
-     (id_terreno, id_cultivo, temporada, ndvi, evi, indice_fertilidad,
-      lluvia_acumulada, gdd_acumulado, tendencia_rendimiento_5temp, particion)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id_terreno, id_cultivo, temporada, ndvi, evi, indice_fertilidad,
-     lluvia_acumulada, gdd_acumulado, tendencia_rendimiento_5temp, particion]
-  );
-  return { id_registro: result.insertId, ...data };
-};
-
-const update = async (id_registro, data) => {
-  const {
-    id_terreno, id_cultivo, temporada, ndvi, evi, indice_fertilidad,
-    lluvia_acumulada, gdd_acumulado, tendencia_rendimiento_5temp, particion
-  } = data;
-  await pool.query(
-    `UPDATE dataset_procesado SET
-     id_terreno = ?, id_cultivo = ?, temporada = ?, ndvi = ?, evi = ?,
-     indice_fertilidad = ?, lluvia_acumulada = ?, gdd_acumulado = ?,
-     tendencia_rendimiento_5temp = ?, particion = ?
-     WHERE id_registro = ?`,
-    [id_terreno, id_cultivo, temporada, ndvi, evi, indice_fertilidad,
-     lluvia_acumulada, gdd_acumulado, tendencia_rendimiento_5temp, particion, id_registro]
-  );
-  return { id_registro, ...data };
-};
-
-const remove = async (id_registro) => {
-  await pool.query('DELETE FROM dataset_procesado WHERE id_registro = ?', [id_registro]);
-  return { id_registro };
-};
-
-module.exports = { getAll, getById, getByTerreno, create, update, remove };
