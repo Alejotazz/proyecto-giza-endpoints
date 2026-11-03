@@ -1,0 +1,5 @@
+# Variables de entorno con claves: nunca se suben al repositorio
+.env
+.env.*
+!.env.example
+node_modules/
