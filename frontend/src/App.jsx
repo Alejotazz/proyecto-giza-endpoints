@@ -1,4 +1,4 @@
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
@@ -8,6 +8,18 @@ import EditProfile from './pages/EditProfile';
 
 export default function App() {
   const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+
+  // Login y Registro tienen su propia pantalla completa (barra, hero y formulario)
+  if (pathname === '/login' || pathname === '/register') {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    );
+  }
+
   return (
     <>
       <nav style={{ display: 'flex', gap: 16, padding: 16 }}>

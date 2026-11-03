@@ -2,15 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const { verificarToken } = require('./middleware/auht.middleware');
 const { rutaNoEncontrada, manejarErrores } = require('./middleware/error.middleware');
-const cors = require('cors');
 
 const app = express();
-app.use(cors({ 
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], 
-    allowedHeaders: ('Content-Type','Authorization'),
-}));
-
-app.use(cors({ 
+app.use(cors({
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], 
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

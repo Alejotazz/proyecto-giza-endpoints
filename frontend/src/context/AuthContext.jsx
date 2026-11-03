@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { iniciarSesion, obtenerPerfil } from '../services/auth';
+import { getToken, setToken, clearToken } from '../utils/token';
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -9,19 +10,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const logout = () => {
-    localStorage.removeItem('token');
+    clearToken();
     setUser(null);
   };
 
   // Al abrir la app: si hay token guardado, recupera el perfil
   useEffect(() => {
-    if (!localStorage.getItem('token')) { setLoading(false); return; }
+    if (!getToken()) { setLoading(false); return; }
     obtenerPerfil().then(setUser).catch(logout).finally(() => setLoading(false));
   }, []);
 
-  const login = async (correo, password) => {
+  const login = async (correo, password, recordar = true) => {
     const { token } = await iniciarSesion(correo, password);
-    localStorage.setItem('token', token);
+    setToken(token, recordar);
     setUser(await obtenerPerfil());
   };
 
