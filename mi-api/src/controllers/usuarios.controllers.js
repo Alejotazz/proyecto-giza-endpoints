@@ -85,22 +85,26 @@ async function getCultivo(req, res) {
 
 async function createCultivo(req, res) {
   try {
-    const { nombre, descripcion } = req.body;
-    if (!nombre) return res.status(400).json({ mensaje: 'nombre es obligatorio' });
-    const nuevoCultivo = await usuariosModel.createCultivo({ nombre, descripcion });
+    const { nombre_cultivo } = req.body;
+    if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
+    const nuevoCultivo = await usuariosModel.createCultivo({ nombre_cultivo });
     res.status(201).json(nuevoCultivo);
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
     res.status(500).json({ mensaje: 'Error al crear el cultivo', error: error.message });
   }
 }
 
 async function updateCultivo(req, res) {
   try {
+    const { nombre_cultivo } = req.body;
+    if (!nombre_cultivo) return res.status(400).json({ mensaje: 'nombre_cultivo es obligatorio' });
     const cultivoExistente = await usuariosModel.getCultivoById(req.params.id);
     if (!cultivoExistente) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
-    const cultivoActualizado = await usuariosModel.updateCultivo(req.params.id, req.body);
+    const cultivoActualizado = await usuariosModel.updateCultivo(req.params.id, { nombre_cultivo });
     res.json(cultivoActualizado);
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ mensaje: 'Ese cultivo ya existe' });
     res.status(500).json({ mensaje: 'Error al actualizar el cultivo', error: error.message });
   }
 }
@@ -111,6 +115,9 @@ async function deleteCultivo(req, res) {
     if (!eliminado) return res.status(404).json({ mensaje: 'Cultivo no encontrado' });
     res.json({ mensaje: 'Cultivo eliminado correctamente' });
   } catch (error) {
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(409).json({ mensaje: 'No se puede eliminar: hay terrenos que usan este cultivo' });
+    }
     res.status(500).json({ mensaje: 'Error al eliminar el cultivo', error: error.message });
   }
 }
