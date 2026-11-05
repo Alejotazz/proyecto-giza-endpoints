@@ -60,7 +60,7 @@ export default function Login() {
     setCargando(true);
     try {
       await login(form.correo, form.password, recordar);
-      navigate('/perfil');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.mensaje || 'No se pudo iniciar sesión');
     } finally {

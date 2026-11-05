@@ -20,12 +20,13 @@ export default function AppLayout() {
     <div className="giza">
       <header className="giza-nav">
         <div className="giza-nav__left">
-          <Link to="/perfil" className="giza-logo">
+          <Link to="/dashboard" className="giza-logo">
             <img className="giza-logo__icon" src="/giza-emblem.png" alt="Logo Giza" />
             <span>Giza<span className="dot">.</span></span>
           </Link>
-          <nav className="giza-links">
-            <NavLink to="/perfil" end>Mi perfil</NavLink>
+          <nav className="giza-links app-links">
+            <NavLink to="/dashboard">Panel</NavLink>
+            <NavLink to="/perfil">Mi perfil</NavLink>
           </nav>
         </div>
         <div className="giza-nav__right">

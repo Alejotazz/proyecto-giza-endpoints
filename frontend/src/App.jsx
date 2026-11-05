@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import AppLayout from './components/AppLayout';
+import Dashboard from './pages/Dashboard';
 import './styles/auth.css';
 import './styles/app.css';
 
@@ -23,9 +24,10 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/perfil" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/perfil/editar" element={<EditProfile />} />
           {/* aquí van también las rutas protegidas del CRUD de productos */}
@@ -43,7 +45,7 @@ function NoEncontrada() {
         <div>
           <h2>Página no encontrada</h2>
           <p>La dirección que buscas no existe.</p>
-          <Link to="/perfil" className="g-btn g-btn--primary">Ir a mi perfil</Link>
+          <Link to="/dashboard" className="g-btn g-btn--primary">Ir al panel</Link>
         </div>
       </div>
     </div>

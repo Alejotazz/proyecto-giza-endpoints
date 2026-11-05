@@ -93,3 +93,14 @@
 @media (max-width: 480px) {
   .giza-nav__right .app-logout { display: inline-flex; }
 }
+
+/* Las pantallas internas mantienen sus enlaces (Panel / Mi perfil) en celular */
+@media (max-width: 960px) {
+  .giza-nav .app-links { display: flex; }
+  .giza-nav__left { gap: 14px; }
+}
+@media (max-width: 480px) {
+  .giza-logo > span { display: none; }
+  .app-links a { padding: 6px 9px; font-size: 0.84rem; }
+  .giza-nav__right .app-logout { padding: 7px 10px; font-size: 0.8rem; }
+}

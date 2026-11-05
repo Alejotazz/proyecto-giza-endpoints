@@ -1,0 +1,111 @@
+/* ===== Giza · Dashboard — usa las variables de auth.css ===== */
+.giza {
+  /* Colores de gráficas (validados contra la superficie oscura #0f2416) */
+  --ch-1: #3fae49;    /* serie única: rendimiento */
+  --ch-2: #21a07a;    /* serie única: precipitación */
+  --ch-max: #c08a1e;  /* temperatura máxima */
+  --ch-min: #21a07a;  /* temperatura mínima */
+  --st-good: #57c95f; --st-warn: #e0b44c; --st-bad: #ff7a7a; --st-none: #8aa592;
+}
+
+.dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.dash-head .prof-name { margin: 0; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi { display: flex; gap: 14px; align-items: center; padding: 18px; border-radius: 14px; background: rgba(15, 36, 22, 0.75); border: 1px solid var(--g-border); }
+.kpi__ico { width: 44px; height: 44px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 1.2rem; background: rgba(63, 174, 73, 0.12); border: 1px solid var(--g-border-2); }
+.kpi small { display: block; color: var(--g-dim); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.kpi b { font-family: Georgia, serif; font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+.kpi b em { font-family: inherit; font-style: normal; font-size: 0.85rem; color: var(--g-muted); font-weight: 400; }
+
+/* Selector de terreno */
+.dash-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.dash-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: var(--g-card); border: 1px solid var(--g-border); color: var(--g-muted); font: inherit; font-size: 0.88rem; cursor: pointer; transition: 0.15s; }
+.dash-pill small { color: var(--g-dim); font-size: 0.75rem; }
+.dash-pill:hover { color: var(--g-text); border-color: var(--g-border-2); }
+.dash-pill.active { color: #fff; background: linear-gradient(180deg, #2f8a39, #23692b); border-color: transparent; }
+.dash-pill.active small { color: rgba(255, 255, 255, 0.75); }
+
+/* Rejilla de widgets */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.dash-grid--admin { grid-template-columns: 3fr 2fr; }
+.widget { min-width: 0; }
+.widget__empty { display: grid; place-items: center; text-align: center; min-height: 140px; padding: 20px; border: 1px dashed var(--g-border-2); border-radius: 12px; color: var(--g-muted); font-size: 0.9rem; }
+.widget__subhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0 4px; font-size: 0.82rem; color: var(--g-muted); font-weight: 600; }
+
+.dash-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 48px 24px; }
+.dash-empty h3 { font-family: Georgia, serif; font-size: 1.4rem; margin: 6px 0 0; }
+.dash-empty p { color: var(--g-muted); max-width: 440px; line-height: 1.55; margin: 0; }
+
+/* Gráficas */
+.ch-wrap { position: relative; }
+.ch-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+.ch-axis text { fill: var(--g-dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ch-axis .ch-unit { fill: var(--g-muted); font-size: 11px; }
+.ch-grid { stroke: var(--g-border); stroke-width: 1; }
+.ch-base { stroke: var(--g-border-2); stroke-width: 1; }
+.ch-cross { stroke: var(--g-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.ch-tip { position: absolute; pointer-events: none; z-index: 2; display: grid; gap: 3px; padding: 8px 10px; border-radius: 8px; background: #06110a; border: 1px solid var(--g-border-2); font-size: 0.78rem; color: var(--g-muted); white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+.ch-tip b { color: var(--g-text); font-variant-numeric: tabular-nums; }
+.ch-tip i, .ch-legend i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.ch-legend { display: flex; gap: 14px; font-size: 0.78rem; color: var(--g-muted); font-weight: 400; }
+
+/* pH */
+.ph { margin: 6px 0 18px; }
+.ph__bar { position: relative; height: 12px; border-radius: 999px; background: linear-gradient(90deg, #d9534f 0%, #e0b44c 28%, #57c95f 50%, #3fa7c9 72%, #6a5acd 100%); margin: 34px 0 8px; }
+.ph__mark { position: absolute; top: -8px; width: 4px; height: 28px; margin-left: -2px; border-radius: 2px; background: var(--g-text); box-shadow: 0 0 0 2px var(--g-card); }
+.ph__mark b { position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); padding: 2px 8px; border-radius: 6px; background: var(--g-card); border: 1px solid var(--g-border-2); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.ph__scale { display: flex; justify-content: space-between; color: var(--g-dim); font-size: 0.72rem; }
+.ph__zona { margin: 10px 0 0; color: var(--g-muted); font-size: 0.88rem; }
+.ph__zona b { color: var(--g-text); }
+.nutri { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nutri div { padding: 12px; border-radius: 10px; background: var(--g-card); border: 1px solid var(--g-border); }
+.nutri small { display: block; color: var(--g-dim); font-size: 0.74rem; margin-bottom: 4px; }
+.nutri b { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+
+/* Estado del cultivo */
+.estados { display: grid; gap: 12px; }
+.estado__top { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--g-muted); margin-bottom: 6px; }
+.estado__top b { color: var(--g-text); font-variant-numeric: tabular-nums; }
+.estado__bar { height: 8px; border-radius: 999px; background: var(--g-card); border: 1px solid var(--g-border); overflow: hidden; }
+.estado__bar span { display: block; height: 100%; border-radius: 999px; }
+.st-good .estado__bar span { background: var(--st-good); }
+.st-warn .estado__bar span { background: var(--st-warn); }
+.st-bad .estado__bar span { background: var(--st-bad); }
+.st-none .estado__bar span { background: var(--st-none); }
+
+/* Pills de estado */
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.76rem; font-weight: 700; white-space: nowrap; border: 1px solid; }
+.pill.st-good { color: var(--st-good); border-color: rgba(87, 201, 95, 0.4); background: rgba(87, 201, 95, 0.1); }
+.pill.st-warn { color: var(--st-warn); border-color: rgba(224, 180, 76, 0.4); background: rgba(224, 180, 76, 0.1); }
+.pill.st-bad { color: var(--st-bad); border-color: rgba(255, 122, 122, 0.4); background: rgba(255, 122, 122, 0.08); }
+.pill.st-none { color: var(--st-none); border-color: var(--g-border-2); background: transparent; }
+
+/* Tabla y alertas */
+.tabla-wrap { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+.tabla th { text-align: left; color: var(--g-dim); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 10px; border-bottom: 1px solid var(--g-border-2); }
+.tabla td { padding: 10px; border-bottom: 1px solid var(--g-border); }
+.tabla tr:last-child td { border-bottom: 0; }
+.alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.alertas li { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 10px; background: var(--g-card); border: 1px solid var(--g-border); }
+.alertas li.nueva { border-color: rgba(224, 180, 76, 0.4); }
+.alertas b { font-size: 0.9rem; }
+.alertas p { margin: 4px 0 0; color: var(--g-muted); font-size: 0.84rem; line-height: 1.45; }
+
+/* Esqueletos de carga */
+.skel { display: block; border-radius: 10px; background: linear-gradient(90deg, var(--g-card) 0%, #163420 50%, var(--g-card) 100%); background-size: 200% 100%; animation: giza-skel 1.3s ease-in-out infinite; }
+.skel--num { width: 70px; height: 30px; }
+.skel--chart { height: 190px; }
+.skel--card { height: 300px; border: 1px solid var(--g-border); border-radius: 14px; }
+@keyframes giza-skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+@media (max-width: 900px) {
+  .dash-grid, .dash-grid--admin { grid-template-columns: 1fr; }
+}
+.kpis { grid-template-columns: repeat(4, 1fr); }
+.kpis--6 { grid-template-columns: repeat(3, 1fr); }
+.kpi b { white-space: nowrap; }
+@media (max-width: 900px) { .kpis, .kpis--6 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 420px) { .kpi { padding: 14px; gap: 10px; } .kpi__ico { width: 38px; height: 38px; } .kpi b { font-size: 1.4rem; } }
