@@ -33,9 +33,9 @@ async function pedir(metodo, ruta, { token, body, headers = {} } = {}) {
   return { status: res.status, body: json, headers: res.headers };
 }
 
-async function registrar(nombre) {
+async function registrar(nombre, extra = {}) {
   const correo = `${nombre}.${sufijo}@prueba.com`;
-  const r = await pedir('POST', '/api/auth/registro', { body: { nombre, correo, password: 'secreto123' } });
+  const r = await pedir('POST', '/api/auth/registro', { body: { nombre, correo, password: 'secreto123', ...extra } });
   assert.equal(r.status, 201, JSON.stringify(r.body));
   creados.usuarios.push(r.body.usuario.id_usuario);
   return { ...r.body, correo };
@@ -60,7 +60,8 @@ before(async () => {
     body: { nombre: 'Lote A', id_cultivo: idCultivo, area_hectareas: 3.5, coordenadas_lat: 4.6, coordenadas_lon: -74 },
   });
   idTerreno = t.body.id_terreno; creados.terrenos.push(idTerreno);
-  await pedir('POST', `/api/terrenos/${idTerreno}/usuarios`, { token: admin.token, body: { id_usuario: ana.usuario.id_usuario } });
+  const asignacion = await pedir('POST', `/api/terrenos/${idTerreno}/usuarios`, { token: admin.token, body: { id_usuario: ana.usuario.id_usuario } });
+  assert.equal(asignacion.status, 201, JSON.stringify(asignacion.body));
 });
 
 after(async () => {
@@ -98,7 +99,7 @@ t2('registro valida correo y password', async () => {
 t2('login correcto e incorrecto; usuario sin password da 401', async () => {
   assert.equal((await pedir('POST', '/api/auth/login', { body: { correo: ana.correo, password: 'secreto123' } })).status, 200);
   assert.equal((await pedir('POST', '/api/auth/login', { body: { correo: ana.correo, password: 'mala' } })).status, 401);
-  const [r] = await pool.query("INSERT INTO usuarios (nombre, correo) VALUES ('viejo', ?)", [`viejo.${sufijo}@prueba.com`]);
+  const [r] = await pool.query("INSERT INTO usuarios (nombre, correo, password) VALUES ('viejo', ?, '')", [`viejo.${sufijo}@prueba.com`]);
   creados.usuarios.push(r.insertId);
   assert.equal((await pedir('POST', '/api/auth/login', { body: { correo: `viejo.${sufijo}@prueba.com`, password: 'loquesea' } })).status, 401);
 });
@@ -153,7 +154,7 @@ t2('clima, muestras e imágenes validan datos', async () => {
 
 t2('modelos/dataset/alertas: solo el admin modifica', async () => {
   assert.equal((await pedir('POST', '/api/modelos', { token: ana.token, body: { nombre_modelo: 'x' } })).status, 403);
-  const m = await pedir('POST', '/api/modelos', { token: admin.token, body: { nombre_modelo: `CNN ${sufijo}`, version: 1 } });
+  const m = await pedir('POST', '/api/modelos', { token: admin.token, body: { nombre_modelo: `CNN ${sufijo}`, tipo: 'imagenes_CNN', id_cultivo: idCultivo, version: 1 } });
   assert.equal(m.status, 201, JSON.stringify(m.body));
   assert.equal((await pedir('GET', `/api/modelos/${m.body.id_modelo}`, { token: ana.token })).status, 200);
   assert.equal((await pedir('PUT', `/api/modelos/${m.body.id_modelo}`, { token: admin.token, body: { version: '2' } })).body.nombre_modelo, `CNN ${sufijo}`);
@@ -164,6 +165,57 @@ t2('modelos/dataset/alertas: solo el admin modifica', async () => {
   assert.equal((await pedir('GET', `/api/terrenos/${idTerreno}/dataset`, { token: ana.token })).status, 200);
   assert.equal((await pedir('GET', '/api/alertas', { token: ana.token })).status, 403);
   assert.equal((await pedir('GET', '/api/retroalimentacion', { token: ana.token })).status, 403);
+});
+
+t2('registro: tipo_usuario define el rol y nunca da administrador ni investigador', async () => {
+  const sinTipo = await registrar('sintipo');
+  assert.equal(sinTipo.usuario.rol, 'agricultor');
+  const agro = await registrar('agronoma', { tipo_usuario: 'agronomo' });
+  assert.equal(agro.usuario.rol, 'agronomo');
+  const emp = await registrar('empresa', { tipo_usuario: 'empresa' });
+  assert.equal(emp.usuario.rol, 'empresa');
+  for (const tipo_usuario of ['administrador', 'investigador', 'inventado']) {
+    const r = await pedir('POST', '/api/auth/registro', { body: { nombre: 'x', correo: `tipo.${tipo_usuario}.${sufijo}@prueba.com`, password: 'secreto123', tipo_usuario } });
+    assert.equal(r.status, 400, JSON.stringify(r.body));
+  }
+  // El body no puede colar un rol por otro campo
+  const colado = await registrar('colado', { rol: 'administrador' });
+  assert.equal(colado.usuario.rol, 'agricultor');
+});
+
+t2('dataset: el investigador (asignado por un admin) lee todo, el agricultor no y el investigador no escribe', async () => {
+  const inv = await registrar('lectora');
+  assert.equal((await pedir('GET', '/api/dataset', { token: inv.token })).status, 403);
+  const ascenso = await pedir('PUT', `/api/usuarios/${inv.usuario.id_usuario}`, { token: admin.token, body: { rol: 'investigador' } });
+  assert.equal(ascenso.status, 200, JSON.stringify(ascenso.body));
+  assert.equal(ascenso.body.rol, 'investigador');
+  assert.equal((await pedir('GET', '/api/dataset', { token: inv.token })).status, 200);
+  assert.equal((await pedir('GET', '/api/dataset', { token: ana.token })).status, 403);
+  assert.equal((await pedir('GET', '/api/dataset', { token: admin.token })).status, 200);
+  assert.equal((await pedir('POST', '/api/dataset', { token: inv.token, body: {} })).status, 403);
+});
+
+t2('terrenos_usuarios: rol_relacion se valida, por defecto consultor, y no se duplica', async () => {
+  const ruta = `/api/terrenos/${idTerreno}/usuarios`;
+  const quien = await pedir('GET', ruta, { token: admin.token });
+  assert.equal(quien.status, 200, JSON.stringify(quien.body));
+  assert.equal(quien.body.find((u) => u.id_usuario === ana.usuario.id_usuario).rol_relacion, 'consultor');
+
+  const carla = await registrar('carla');
+  assert.equal((await pedir('POST', ruta, { token: admin.token, body: { id_usuario: carla.usuario.id_usuario, rol_relacion: 'jefe' } })).status, 400);
+  const ok = await pedir('POST', ruta, { token: admin.token, body: { id_usuario: carla.usuario.id_usuario, rol_relacion: 'encargado' } });
+  assert.equal(ok.status, 201, JSON.stringify(ok.body));
+  assert.equal(ok.body.rol_relacion, 'encargado');
+  assert.equal((await pedir('POST', ruta, { token: admin.token, body: { id_usuario: carla.usuario.id_usuario } })).status, 409);
+  assert.equal((await pedir('POST', ruta, { token: ana.token, body: { id_usuario: carla.usuario.id_usuario } })).status, 403);
+  assert.equal((await pedir('DELETE', `${ruta}/${carla.usuario.id_usuario}`, { token: admin.token })).status, 200);
+});
+
+t2('el admin puede asignar los roles nuevos', async () => {
+  const dora = await registrar('dora');
+  const r = await pedir('PUT', `/api/usuarios/${dora.usuario.id_usuario}`, { token: admin.token, body: { rol: 'empresa' } });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.rol, 'empresa');
 });
 
 t2('errores de BD no exponen SQL y se traducen a 4xx', async () => {

@@ -1,7 +1,16 @@
 const { peticionInvalida } = require('./errores');
 
 // Roles de la app. Si se agrega uno nuevo en la BD, agregarlo aquí también.
-const ROLES = (process.env.ROLES || 'administrador,agricultor').split(',').map((r) => r.trim()).filter(Boolean);
+const ROLES = (process.env.ROLES || 'administrador,agricultor,agronomo,investigador,empresa').split(',').map((r) => r.trim()).filter(Boolean);
+
+// Roles que una persona puede elegir al registrarse. 'administrador' e 'investigador'
+// nunca están aquí: dan acceso a datos de todos los terrenos y solo los asigna un admin.
+const ROLES_REGISTRO = ['agricultor', 'agronomo', 'empresa'];
+const ROL_POR_DEFECTO = 'agricultor';
+
+// Relación de un usuario con un terreno (ENUM terrenos_usuarios.rol_relacion)
+const ROLES_RELACION = ['propietario', 'encargado', 'consultor'];
+const RELACION_POR_DEFECTO = 'consultor';
 
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,4 +46,24 @@ function validarRol(rol) {
   return rol;
 }
 
-module.exports = { ROLES, validarCorreo, validarPassword, validarTexto, validarRol };
+// tipo_usuario del registro público: opcional, y nunca puede ser administrador
+function validarTipoUsuario(tipo) {
+  if (tipo === undefined || tipo === null || tipo === '') return ROL_POR_DEFECTO;
+  if (!ROLES_REGISTRO.includes(tipo)) {
+    throw peticionInvalida(`tipo_usuario debe ser uno de: ${ROLES_REGISTRO.join(', ')}`);
+  }
+  return tipo;
+}
+
+function validarRolRelacion(rol) {
+  if (rol === undefined || rol === null || rol === '') return RELACION_POR_DEFECTO;
+  if (!ROLES_RELACION.includes(rol)) {
+    throw peticionInvalida(`rol_relacion debe ser uno de: ${ROLES_RELACION.join(', ')}`);
+  }
+  return rol;
+}
+
+module.exports = {
+  ROLES, ROLES_REGISTRO, ROLES_RELACION,
+  validarCorreo, validarPassword, validarTexto, validarRol, validarTipoUsuario, validarRolRelacion,
+};

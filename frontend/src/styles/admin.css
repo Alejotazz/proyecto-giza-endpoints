@@ -1,0 +1,45 @@
+/* ===== Giza · Administración de usuarios — usa las variables de auth.css ===== */
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.admin-usuarios, .admin-side { display: grid; gap: 14px; min-width: 0; }
+
+.usuario { background: rgba(15, 36, 22, 0.75); border: 1px solid var(--g-border); border-radius: 14px; padding: 16px 18px; display: grid; gap: 12px; }
+.usuario__fila { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.usuario__avatar { width: 42px; height: 42px; flex: none; font-size: 0.9rem; }
+.usuario__datos { flex: 1 1 180px; min-width: 0; }
+.usuario__datos b { display: block; font-size: 0.98rem; overflow-wrap: anywhere; }
+.usuario__datos b em { font-style: normal; font-weight: 400; color: var(--g-dim); font-size: 0.85rem; }
+.usuario__datos small { color: var(--g-muted); font-size: 0.84rem; overflow-wrap: anywhere; }
+.usuario__fecha { color: var(--g-dim); font-size: 0.8rem; white-space: nowrap; }
+.usuario__acciones { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-basis: 100%; }
+
+.usuario__confirmar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; border-radius: 10px; font-size: 0.88rem; color: #ffd6d6; background: rgba(255, 122, 122, 0.08); border: 1px solid rgba(255, 122, 122, 0.35); }
+.usuario__confirmar > div { display: flex; gap: 8px; }
+
+.usuario__terrenos { border-top: 1px solid var(--g-border); padding-top: 12px; }
+.usuario__terrenos h4 { margin: 0 0 10px; font-size: 0.88rem; color: var(--g-muted); }
+.usuario__terrenos .muted { margin: 0; color: var(--g-muted); font-size: 0.85rem; }
+.terr-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.terr-fila { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: var(--g-card); border: 1px solid var(--g-border); }
+.terr-fila__info { min-width: 0; }
+.terr-fila__info b { font-size: 0.9rem; overflow-wrap: anywhere; }
+.terr-fila__info small { margin-left: 8px; color: var(--g-dim); font-size: 0.78rem; }
+.terr-fila__acc { display: flex; align-items: center; gap: 8px; }
+.terr-fila__error { flex-basis: 100%; margin: 0; }
+
+.g-btn--sm { padding: 6px 12px; font-size: 0.82rem; }
+.g-btn--ghost:disabled, .g-btn--danger:disabled { opacity: 0.6; cursor: wait; }
+.g-btn--danger { background: transparent; color: var(--g-red); border-color: rgba(255, 122, 122, 0.45); }
+.g-btn--danger:hover { background: rgba(255, 122, 122, 0.1); }
+
+.g-select { padding: 7px 10px; font: inherit; font-size: 0.85rem; color: var(--g-text); background: var(--g-card); border: 1px solid var(--g-border-2); border-radius: 8px; outline: none; }
+.g-select option { background: var(--g-panel); color: var(--g-text); }
+.g-select:focus { border-color: var(--g-green); box-shadow: 0 0 0 3px rgba(63, 174, 73, 0.18); }
+.g-select:disabled { opacity: 0.55; cursor: not-allowed; }
+.g-select--block { display: block; width: 100%; padding: 11px 12px; font-size: 0.92rem; }
+.g-input--plain input { padding: 11px 12px; }
+
+.skel--usuario { height: 112px; border: 1px solid var(--g-border); border-radius: 14px; }
+
+@media (max-width: 960px) {
+  .admin-grid { grid-template-columns: 1fr; }
+}

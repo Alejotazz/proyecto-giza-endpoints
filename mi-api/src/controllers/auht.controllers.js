@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authModel = require('../models/auht.models');
-const { validarCorreo, validarPassword, validarTexto } = require('../utils/usuarios.validacion');
+const { validarCorreo, validarPassword, validarTexto, validarTipoUsuario } = require('../utils/usuarios.validacion');
 const { HttpError } = require('../utils/errores');
 
 const SALT_ROUNDS = 10;
@@ -25,15 +25,16 @@ async function registrar(req, res) {
   const correo = validarCorreo(body.correo);
   const password = validarPassword(body.password);
   const telefono = validarTexto(body.telefono, 'telefono', { maxLargo: 30 });
+  const rol = validarTipoUsuario(body.tipo_usuario);
 
   if (await authModel.findByCorreo(correo)) {
     throw new HttpError(409, 'El correo ya está registrado');
   }
 
   const hash = await bcrypt.hash(password, SALT_ROUNDS);
-  // El rol NO se toma del body: un registro público siempre crea un 'agricultor'.
-  // Los roles los asigna un admin desde /api/usuarios.
-  const usuario = await authModel.create({ nombre, correo, password: hash, telefono });
+  // El campo 'rol' del body se ignora: solo cuenta tipo_usuario, que nunca puede ser
+  // 'administrador' ni 'investigador'. Esos roles los asigna un admin desde /api/usuarios.
+  const usuario = await authModel.create({ nombre, correo, password: hash, telefono, rol });
 
   res.status(201).json({ usuario, token: generarToken(usuario) });
 }

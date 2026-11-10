@@ -6,6 +6,8 @@ import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import AppLayout from './components/AppLayout';
 import Dashboard from './pages/Dashboard';
+import AdminUsuarios from './pages/AdminUsuarios';
+import { ROL_ADMIN } from './utils/roles';
 import './styles/auth.css';
 import './styles/app.css';
 
@@ -30,6 +32,9 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/perfil/editar" element={<EditProfile />} />
+          <Route element={<ProtectedRoute roles={[ROL_ADMIN]} />}>
+            <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+          </Route>
           {/* aquí van también las rutas protegidas del CRUD de productos */}
         </Route>
       </Route>

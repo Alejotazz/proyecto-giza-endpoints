@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ROL_ADMIN } from '../utils/roles';
 import '../styles/auth.css';
 import '../styles/app.css';
 
@@ -27,6 +28,7 @@ export default function AppLayout() {
           <nav className="giza-links app-links">
             <NavLink to="/dashboard">Panel</NavLink>
             <NavLink to="/perfil">Mi perfil</NavLink>
+            {user?.rol === ROL_ADMIN && <NavLink to="/admin/usuarios">Usuarios</NavLink>}
           </nav>
         </div>
         <div className="giza-nav__right">

@@ -115,7 +115,7 @@ body { margin: 0; }
 .g-input input:focus { border-color: var(--g-green); box-shadow: 0 0 0 3px rgba(63, 174, 73, 0.18); }
 .g-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: 0; color: var(--g-muted); cursor: pointer; font-size: 0.95rem; padding: 4px 6px; }
 
-.g-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+.g-roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
 .g-role { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px; border-radius: 10px; background: var(--g-card); border: 1px solid var(--g-border); color: var(--g-muted); font-size: 0.85rem; cursor: pointer; font-family: inherit; transition: 0.15s; }
 .g-role .emoji { font-size: 1.3rem; }
 .g-role:hover { border-color: var(--g-border-2); color: var(--g-text); }

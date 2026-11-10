@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { obtenerTerrenos } from '../services/auth';
 import { iniciales } from '../components/AppLayout';
+import { ROL_ADMIN, etiquetaRol, iconoRol } from '../utils/roles';
 
 const formatoFecha = (valor) => {
   if (!valor) return null;
@@ -83,7 +84,7 @@ function MisTerrenos() {
 export default function Profile() {
   const { user } = useAuth();
   const guardado = useLocation().state?.guardado;
-  const esAdmin = user.rol === 'administrador';
+  const esAdmin = user.rol === ROL_ADMIN;
   const desde = formatoFecha(user.fecha_registro);
 
   return (
@@ -98,7 +99,7 @@ export default function Profile() {
           <div className="prof-meta">
             <span>{user.correo}</span>
             <span className={`prof-badge${esAdmin ? ' prof-badge--admin' : ''}`}>
-              {esAdmin ? '⚙️' : '👨‍🌾'} {user.rol}
+              {iconoRol(user.rol)} {etiquetaRol(user.rol)}
             </span>
             {desde && <span>· Miembro desde {desde}</span>}
           </div>
@@ -116,7 +117,7 @@ export default function Profile() {
             <Dato icono="👤" etiqueta="Nombre" valor={user.nombre} />
             <Dato icono="✉️" etiqueta="Correo electrónico" valor={user.correo} />
             <Dato icono="📱" etiqueta="Teléfono" valor={user.telefono} vacio="Sin teléfono" />
-            <Dato icono={esAdmin ? '⚙️' : '👨‍🌾'} etiqueta="Rol" valor={<span style={{ textTransform: 'capitalize' }}>{user.rol}</span>} />
+            <Dato icono={iconoRol(user.rol)} etiqueta="Rol" valor={etiquetaRol(user.rol)} />
             <Dato icono="📅" etiqueta="Fecha de registro" valor={desde} vacio="Sin fecha" />
           </div>
         </section>

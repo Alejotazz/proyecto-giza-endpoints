@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registrar } from '../services/auth';
 import AuthLayout, { AuthTabs, RoleSelector, Field, PasswordField } from '../components/AuthLayout';
-
-// Selector solo visual: el backend siempre crea la cuenta como 'agricultor'
-const TIPOS = [
-  { id: 'agricultor', label: 'Agricultor', icon: '👨‍🌾' },
-  { id: 'agronomo', label: 'Agrónomo', icon: '🔬' },
-  { id: 'investigador', label: 'Investigador', icon: '📊' },
-  { id: 'empresa', label: 'Empresa', icon: '🏢' },
-];
+import { ROLES_REGISTRO } from '../utils/roles';
 
 function Hero() {
   return (
@@ -54,6 +47,7 @@ export default function Register() {
         nombre: `${form.nombre} ${form.apellido}`.trim(),
         correo: form.correo,
         password: form.password,
+        tipo_usuario: tipo,
       });
       navigate('/login', { state: { registrado: true } });
     } catch (err) {
@@ -82,7 +76,7 @@ export default function Register() {
           placeholder="Mínimo 8 caracteres" minLength={8} autoComplete="new-password" required />
 
         <span className="g-label">Tipo de usuario</span>
-        <RoleSelector roles={TIPOS} value={tipo} onChange={setTipo} />
+        <RoleSelector roles={ROLES_REGISTRO} value={tipo} onChange={setTipo} />
 
         {error && <div className="g-alert g-alert--error">{error}</div>}
 

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { actualizarPerfil, obtenerPerfil } from '../services/auth';
 import { Field } from '../components/AuthLayout';
 import { iniciales } from '../components/AppLayout';
+import { etiquetaRol } from '../utils/roles';
 
 // Convierte la respuesta de error de la API en un texto para mostrar
 function mensajeDeError(err) {
@@ -69,7 +70,7 @@ export default function EditProfile() {
           <span className="g-label">Rol</span>
           <div className="g-input">
             <span className="ico">🔒</span>
-            <input value={user.rol} disabled style={{ textTransform: 'capitalize', opacity: 0.7 }} />
+            <input value={etiquetaRol(user.rol)} disabled style={{ opacity: 0.7 }} />
           </div>
         </div>
         <p className="g-hint">El rol solo lo puede cambiar un administrador.</p>

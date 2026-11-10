@@ -1,15 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AuthLayout, { AuthTabs, RoleSelector, Field, PasswordField } from '../components/AuthLayout';
-
-// Selector solo visual: el rol real lo define el backend (usuario.rol)
-const ROLES = [
-  { id: 'agricultor', label: 'Agricultor', icon: '👨‍🌾' },
-  { id: 'agronomo', label: 'Agrónomo', icon: '🔬' },
-  { id: 'investigador', label: 'Investigador', icon: '📊' },
-  { id: 'administrador', label: 'Administrador', icon: '⚙️' },
-];
+import AuthLayout, { AuthTabs, Field, PasswordField } from '../components/AuthLayout';
 
 function Hero() {
   return (
@@ -47,7 +39,6 @@ export default function Login() {
   const navigate = useNavigate();
   const recienRegistrado = useLocation().state?.registrado;
   const [form, setForm] = useState({ correo: '', password: '' });
-  const [rol, setRol] = useState('agricultor');
   const [recordar, setRecordar] = useState(true);
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -74,8 +65,6 @@ export default function Login() {
         <h2>Iniciar sesión</h2>
         <p className="sub">Ingresa tus credenciales para continuar</p>
         <AuthTabs />
-
-        <RoleSelector roles={ROLES} value={rol} onChange={setRol} />
 
         <Field label="Correo electrónico" icon="✉️" name="correo" type="email" value={form.correo}
           onChange={onChange} placeholder="juan.mendez@giza.co" autoComplete="email" required />

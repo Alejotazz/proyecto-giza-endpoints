@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import * as srv from '../services/dashboard';
 import { GraficoBarras, GraficoLineas, Leyenda, EscalaPH, fmt } from '../components/charts';
+import { ROL_ADMIN, ROL_INVESTIGADOR, etiquetaRol, iconoRol } from '../utils/roles';
 import '../styles/dashboard.css';
 
 const hoy = () => {
@@ -161,9 +162,9 @@ function PanelTerreno({ terreno, cosechas }) {
 // ---------- Sección del administrador ----------
 function SeccionAdmin({ evaluaciones, alertas }) {
   const evals = [...evaluaciones.datos].sort((a, b) => new Date(b.fecha_evaluacion) - new Date(a.fecha_evaluacion)).slice(0, 8);
-  const ultimas = [...alertas.datos].sort((a, b) => new Date(b.fecha_generada) - new Date(a.fecha_generada)).slice(0, 6);
+  const ultimas = [...(alertas?.datos || [])].sort((a, b) => new Date(b.fecha_generada) - new Date(a.fecha_generada)).slice(0, 6);
   return (
-    <div className="dash-grid dash-grid--admin">
+    <div className={`dash-grid ${alertas ? 'dash-grid--admin' : 'dash-grid--solo'}`}>
       <Widget titulo="Evaluaciones recientes" sub="Métricas de los modelos de IA" error={evaluaciones.error}
         vacio={evals.length === 0 && 'Todavía no hay evaluaciones de modelos.'}>
         <div className="tabla-wrap">
@@ -182,7 +183,7 @@ function SeccionAdmin({ evaluaciones, alertas }) {
         </div>
       </Widget>
 
-      <Widget titulo="Alertas" sub="Las más recientes" error={alertas.error} vacio={ultimas.length === 0 && 'No hay alertas.'}>
+      {alertas && <Widget titulo="Alertas" sub="Las más recientes" error={alertas.error} vacio={ultimas.length === 0 && 'No hay alertas.'}>
         <ul className="alertas">
           {ultimas.map((a) => (
             <li key={a.id_alerta} className={a.leida ? '' : 'nueva'}>
@@ -191,28 +192,34 @@ function SeccionAdmin({ evaluaciones, alertas }) {
             </li>
           ))}
         </ul>
-      </Widget>
+      </Widget>}
     </div>
   );
 }
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const esAdmin = user.rol === 'administrador';
+  const esAdmin = user.rol === ROL_ADMIN;
+  const veEvaluaciones = esAdmin || user.rol === ROL_INVESTIGADOR;
   const [base, setBase] = useState({ cargando: true });
   const [cosechas, setCosechas] = useState({ cargando: true, porTerreno: {} });
   const [seleccion, setSeleccion] = useState(null);
 
   useEffect(() => {
-    const llamadas = [srv.obtenerTerrenos(), srv.obtenerCultivos()];
-    if (esAdmin) llamadas.push(srv.obtenerAlertas(), srv.obtenerModelos(), srv.obtenerEvaluaciones());
+    const llamadas = [
+      srv.obtenerTerrenos(),
+      srv.obtenerCultivos(),
+      esAdmin ? srv.obtenerAlertas() : null,
+      esAdmin ? srv.obtenerModelos() : null,
+      veEvaluaciones ? srv.obtenerEvaluaciones() : null,
+    ];
     Promise.allSettled(llamadas).then(([t, c, a, m, e]) => {
       const terrenos = srv.resultado(t, 'No se pudieron cargar los terrenos');
       setBase({
         cargando: false, terrenos, cultivos: srv.resultado(c),
-        alertas: a && srv.resultado(a, 'No se pudieron cargar las alertas'),
-        modelos: m && srv.resultado(m, 'No se pudieron cargar los modelos'),
-        evaluaciones: e && srv.resultado(e, 'No se pudieron cargar las evaluaciones'),
+        alertas: esAdmin ? srv.resultado(a, 'No se pudieron cargar las alertas') : null,
+        modelos: esAdmin ? srv.resultado(m, 'No se pudieron cargar los modelos') : null,
+        evaluaciones: veEvaluaciones ? srv.resultado(e, 'No se pudieron cargar las evaluaciones') : null,
       });
       setSeleccion(terrenos.datos[0]?.id_terreno ?? null);
       Promise.allSettled(terrenos.datos.map((x) => srv.obtenerCosechas(x.id_terreno))).then((rs) => {
@@ -221,7 +228,7 @@ export default function Dashboard() {
         setCosechas({ cargando: false, porTerreno });
       });
     });
-  }, [esAdmin]);
+  }, [esAdmin, veEvaluaciones]);
 
   const terrenos = base.terrenos?.datos || [];
   const cultivoDe = useMemo(() => Object.fromEntries((base.cultivos?.datos || []).map((c) => [c.id_cultivo, c.nombre_cultivo])), [base.cultivos]);
@@ -238,7 +245,7 @@ export default function Dashboard() {
           <div className="giza-eyebrow">🌱 Panel · <span style={{ textTransform: 'none' }}>{hoy()}</span></div>
           <h1 className="prof-name">Hola, <em className="c-lime" style={{ fontStyle: 'normal' }}>{user.nombre.split(' ')[0]}</em></h1>
         </div>
-        <span className={`prof-badge${esAdmin ? ' prof-badge--admin' : ''}`}>{esAdmin ? '⚙️' : '👨‍🌾'} {user.rol}</span>
+        <span className={`prof-badge${esAdmin ? ' prof-badge--admin' : ''}`}>{iconoRol(user.rol)} {etiquetaRol(user.rol)}</span>
       </section>
 
       <div className={`kpis${esAdmin ? ' kpis--6' : ''}`}>
@@ -286,7 +293,7 @@ export default function Dashboard() {
         </>
       )}
 
-      {esAdmin && !base.cargando && <SeccionAdmin evaluaciones={base.evaluaciones} alertas={base.alertas} />}
+      {veEvaluaciones && !base.cargando && <SeccionAdmin evaluaciones={base.evaluaciones} alertas={base.alertas} />}
     </>
   );
 }

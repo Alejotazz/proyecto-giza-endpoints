@@ -30,6 +30,7 @@
 /* Rejilla de widgets */
 .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
 .dash-grid--admin { grid-template-columns: 3fr 2fr; }
+.dash-grid--solo { grid-template-columns: 1fr; }
 .widget { min-width: 0; }
 .widget__empty { display: grid; place-items: center; text-align: center; min-height: 140px; padding: 20px; border: 1px dashed var(--g-border-2); border-radius: 12px; color: var(--g-muted); font-size: 0.9rem; }
 .widget__subhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0 4px; font-size: 0.82rem; color: var(--g-muted); font-weight: 600; }
@@ -102,7 +103,7 @@
 @keyframes giza-skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 @media (max-width: 900px) {
-  .dash-grid, .dash-grid--admin { grid-template-columns: 1fr; }
+  .dash-grid, .dash-grid--admin, .dash-grid--solo { grid-template-columns: 1fr; }
 }
 .kpis { grid-template-columns: repeat(4, 1fr); }
 .kpis--6 { grid-template-columns: repeat(3, 1fr); }

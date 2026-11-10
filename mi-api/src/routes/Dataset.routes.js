@@ -5,10 +5,12 @@ const { verificarRol } = require('../middleware/auht.middleware');
 const { verificarAccesoTerreno, terrenoDeLaUrl, ROL_ADMIN } = require('../middleware/acceso.middleware');
 
 const soloAdmin = verificarRol(ROL_ADMIN);
+const lecturaGeneral = verificarRol(ROL_ADMIN, 'investigador');
 
-// Datos de entrenamiento: el admin gestiona todo; un usuario solo lee los de sus terrenos
-router.get('/dataset', soloAdmin, ctrl.listar);
-router.get('/dataset/:id', soloAdmin, ctrl.obtener);
+// Datos de entrenamiento: el admin gestiona todo; el investigador puede leerlos todos;
+// los demás usuarios solo leen los de sus terrenos
+router.get('/dataset', lecturaGeneral, ctrl.listar);
+router.get('/dataset/:id', lecturaGeneral, ctrl.obtener);
 router.get('/terrenos/:id_terreno/dataset', verificarAccesoTerreno(terrenoDeLaUrl('id_terreno')), ctrl.listarPorTerreno);
 router.post('/dataset', soloAdmin, ctrl.crear);
 router.put('/dataset/:id', soloAdmin, ctrl.actualizar);

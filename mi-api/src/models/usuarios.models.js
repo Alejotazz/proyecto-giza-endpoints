@@ -83,7 +83,7 @@ async function deleteCultivo(id) {
 
 async function getUsuariosByTerreno(idTerreno) {
     const [rows] = await pool.query(
-    `SELECT u.id_usuario, u.nombre, u.correo, u.rol, tu.rol AS rol_en_terreno
+    `SELECT u.id_usuario, u.nombre, u.correo, u.rol, tu.rol_relacion
     FROM terrenos_usuarios tu
     JOIN usuarios u ON u.id_usuario = tu.id_usuario
     WHERE tu.id_terreno = ?`,
@@ -92,12 +92,12 @@ async function getUsuariosByTerreno(idTerreno) {
     return rows;
 }
 
-async function asignarUsuarioATerreno(idTerreno, idUsuario, rol) {
+async function asignarUsuarioATerreno(idTerreno, idUsuario, rolRelacion) {
 await pool.query(
-    'INSERT INTO terrenos_usuarios (id_terreno, id_usuario, rol) VALUES (?, ?, ?)',
-    [idTerreno, idUsuario, rol ?? null]
+    'INSERT INTO terrenos_usuarios (id_terreno, id_usuario, rol_relacion) VALUES (?, ?, ?)',
+    [idTerreno, idUsuario, rolRelacion]
 );
-    return { id_terreno: idTerreno, id_usuario: idUsuario, rol: rol ?? null };
+    return { id_terreno: idTerreno, id_usuario: idUsuario, rol_relacion: rolRelacion };
 }
 
 async function quitarUsuarioDeTerreno(idTerreno, idUsuario) {

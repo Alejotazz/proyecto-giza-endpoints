@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const usuariosModel = require('../models/usuarios.models');
 const { validarId } = require('../utils/validar');
 const { HttpError, noEncontrado, peticionInvalida } = require('../utils/errores');
-const { validarCorreo, validarPassword, validarTexto, validarRol } = require('../utils/usuarios.validacion');
+const { validarCorreo, validarPassword, validarTexto, validarRol, validarRolRelacion } = require('../utils/usuarios.validacion');
 const { esAdmin } = require('../middleware/acceso.middleware');
 
 // Los errores de estas funciones async los responde error.middleware.js (Express 5)
@@ -134,10 +134,14 @@ async function listUsuariosDeTerreno(req, res) {
 async function asignarUsuarioATerreno(req, res) {
   const body = req.body || {};
   const idUsuario = validarId(body.id_usuario, 'id_usuario');
-  const rol = validarTexto(body.rol, 'rol', { maxLargo: 50 });
+  const rolRelacion = validarRolRelacion(body.rol_relacion);
   if (!(await usuariosModel.getUsuarioById(idUsuario))) throw noEncontrado('Usuario');
-  const relacion = await usuariosModel.asignarUsuarioATerreno(req.idTerreno, idUsuario, rol);
-  res.status(201).json(relacion);
+  try {
+    res.status(201).json(await usuariosModel.asignarUsuarioATerreno(req.idTerreno, idUsuario, rolRelacion));
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') throw new HttpError(409, 'Ese usuario ya está asignado a este terreno');
+    throw error;
+  }
 }
 
 async function quitarUsuarioDeTerreno(req, res) {
