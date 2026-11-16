@@ -7,6 +7,7 @@
     "test": "node --test --test-concurrency=1 test/*.test.js",
     "start": "node index.js",
     "hacer-admin": "node scripts/hacer-admin.js",
+    "importar-sql": "node scripts/importar-sql.js",
     "dev": "nodemon index.js"
   },
   "keywords": [],

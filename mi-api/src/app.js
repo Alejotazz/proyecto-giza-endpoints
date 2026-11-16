@@ -8,6 +8,10 @@ const { rutaNoEncontrada, manejarErrores } = require('./middleware/error.middlew
 
 const app = express();
 
+// Detrás de un proxy (Render, Railway, Nginx...) la IP real del cliente viene en X-Forwarded-For.
+// TRUST_PROXY=1 en producción; sin eso el límite de intentos contaría a todos como una sola IP.
+if (process.env.TRUST_PROXY) app.set('trust proxy', Number(process.env.TRUST_PROXY) || process.env.TRUST_PROXY);
+
 // Orígenes permitidos: CORS_ORIGINS en .env (separados por coma) o el front de Vite en local
 const origenes = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')

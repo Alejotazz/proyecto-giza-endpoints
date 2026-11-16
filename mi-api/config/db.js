@@ -1,6 +1,7 @@
 
 require('dotenv').config();
 const mysql = require('mysql2/promise');
+const { opcionesSSL } = require('./ssl');
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -10,6 +11,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   connectionLimit: Number(process.env.DB_POOL_LIMIT) || 10,
   waitForConnections: true,
+  ssl: opcionesSSL(), // solo si DB_SSL=true (Aiven); en XAMPP queda sin SSL
 });
 
 
